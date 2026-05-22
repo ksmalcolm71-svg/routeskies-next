@@ -24,9 +24,10 @@ export async function GET(request) {
     const get    = type => comps.find(c => c.types.includes(type))?.long_name  || ''
     const getS   = type => comps.find(c => c.types.includes(type))?.short_name || ''
 
-    // Skip pure county results — prefer actual city names
+    // Prefer the most specific name; strip " County" suffix as a last resort
+    const county   = get('administrative_area_level_2').replace(/ County$/i, '').replace(/ Parish$/i, '')
     const cityName = get('locality') || get('sublocality') || get('neighborhood') ||
-                     (get('administrative_area_level_2').includes('County') ? 'En Route' : get('administrative_area_level_2'))
+                     get('administrative_area_level_3') || county
 
     return Response.json({
       city:  cityName || 'En Route',

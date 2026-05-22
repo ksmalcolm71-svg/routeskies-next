@@ -84,6 +84,39 @@ function fuzzyMatch(input) {
 }
 
 // ─────────────────────────────────────────────────────────────────
+// POLYLINE DECODER — Google encoded polyline algorithm
+// ─────────────────────────────────────────────────────────────────
+function decodePolyline(encoded) {
+  const pts = []
+  let i = 0, lat = 0, lng = 0
+  while (i < encoded.length) {
+    let b, shift = 0, result = 0
+    do { b = encoded.charCodeAt(i++) - 63; result |= (b & 0x1f) << shift; shift += 5 } while (b >= 0x20)
+    lat += (result & 1) ? ~(result >> 1) : (result >> 1)
+    shift = 0; result = 0
+    do { b = encoded.charCodeAt(i++) - 63; result |= (b & 0x1f) << shift; shift += 5 } while (b >= 0x20)
+    lng += (result & 1) ? ~(result >> 1) : (result >> 1)
+    pts.push({ lat: lat / 1e5, lon: lng / 1e5 })
+  }
+  return pts
+}
+
+// Haversine distance in meters between two {lat, lon} points
+function haversine(a, b) {
+  const R = 6371000, r = x => x * Math.PI / 180
+  const dLat = r(b.lat - a.lat), dLon = r(b.lon - a.lon)
+  const s = Math.sin(dLat/2)**2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLon/2)**2
+  return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s))
+}
+
+// Extract 2-letter state code from a Google address string
+function extractState(addr) {
+  const parts = addr.split(',')
+  const seg   = parts[parts.length - 2]?.trim() || ''
+  return seg.match(/\b([A-Z]{2})\b/)?.[1] || ''
+}
+
+// ─────────────────────────────────────────────────────────────────
 // ROUTING ENGINE — calls our Next.js API route (server-side)
 // ─────────────────────────────────────────────────────────────────
 async function getRoute(origin, dest, routeType) {
@@ -97,29 +130,20 @@ async function getRoute(origin, dest, routeType) {
   const totalMiles = Math.round(legs.reduce((s, l) => s + l.distance.value, 0) * 0.000621371)
   const totalMin   = Math.round(legs.reduce((s, l) => s + l.duration.value, 0) / 60)
 
-  // Build points from overview_polyline decoded — use steps as fallback
-  const allSteps = legs.flatMap(l => l.steps)
-  let cumDist = 0
-  const allPoints = [
-    {
-      lat:   legs[0].start_location.lat,
-      lon:   legs[0].start_location.lng,
-      name:  legs[0].start_address.split(',')[0],
-      state: legs[0].start_address.split(',')[1]?.trim().split(' ')[0] || '',
-      dist:  0,
-    },
-    ...allSteps.map(s => {
-      cumDist += s.distance.value
-      return { lat: s.end_location.lat, lon: s.end_location.lng, name: null, state: '', dist: cumDist }
-    }),
-    {
-      lat:   legs[legs.length-1].end_location.lat,
-      lon:   legs[legs.length-1].end_location.lng,
-      name:  legs[legs.length-1].end_address.split(',')[0],
-      state: legs[legs.length-1].end_address.split(',')[1]?.trim().split(' ')[0] || '',
-      dist:  cumDist,
-    },
-  ]
+  // Decode the overview_polyline — gives 200-500 points evenly spread along
+  // the actual road, vs. step endpoints which cluster near the origin and leave
+  // entire states with no candidates (root cause of the "En Route" skipping bug).
+  const rawPts = decodePolyline(data.routes[0].overview_polyline.points)
+  let cumDist  = 0
+  const allPoints = rawPts.map((p, i) => {
+    if (i > 0) cumDist += haversine(rawPts[i - 1], p)
+    return { lat: p.lat, lon: p.lon, name: null, state: '', dist: cumDist }
+  })
+  // Label the endpoints with the Directions API address strings
+  allPoints[0].name  = legs[0].start_address.split(',')[0]
+  allPoints[0].state = extractState(legs[0].start_address)
+  allPoints[allPoints.length - 1].name  = legs[legs.length - 1].end_address.split(',')[0]
+  allPoints[allPoints.length - 1].state = extractState(legs[legs.length - 1].end_address)
 
   const waypoints = selectByDistance(allPoints, 8)
 
