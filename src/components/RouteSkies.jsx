@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 // ─────────────────────────────────────────────────────────────────
 // CITY AUTOCOMPLETE DATABASE
@@ -257,6 +257,7 @@ const today   = () => new Date().toISOString().split('T')[0]
 const fmtTime = m  => { const h=Math.floor(m/60)%24, mn=m%60, h12=h%12||12; return `${h12}${mn>0?`:${String(mn).padStart(2,'0')}`:''} ${h>=12?'PM':'AM'}` }
 const fmtOff  = m  => { if(!m) return null; const h=Math.floor(m/60),mn=m%60; return !h?`+${mn}m`:!mn?`+${h}h`:`+${h}h ${mn}m` }
 const fmtTot  = m  => { const h=Math.floor(m/60),mn=m%60; return mn?`${h}h ${mn}m`:`${h}h` }
+const timeAgo = ts => { const m=Math.floor((Date.now()-ts)/60000); if(m<1) return 'just now'; if(m<60) return `${m}m ago`; const h=Math.floor(m/60); if(h<24) return `${h}h ago`; return `${Math.floor(h/24)}d ago` }
 
 // ─────────────────────────────────────────────────────────────────
 // COLORS
@@ -291,6 +292,32 @@ export default function RouteSkies({ onBack }) {
   const [dSug,      setDSug]      = useState([])
   const [directions, setDirections] = useState([])
   const [activeTab,  setActiveTab]  = useState('weather')
+  const [savedRoute, setSavedRoute] = useState(null)
+
+  // On mount, load any previously saved route from localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('rs_last')
+      if (raw) setSavedRoute(JSON.parse(raw))
+    } catch {}
+  }, [])
+
+  function restoreRoute() {
+    if (!savedRoute) return
+    setOrigin(savedRoute.origin || savedRoute.route?.origin || '')
+    setDest(savedRoute.dest   || savedRoute.route?.dest   || '')
+    if (savedRoute.date)     setDate(savedRoute.date)
+    if (savedRoute.timeHour) setTimeHour(savedRoute.timeHour)
+    setRoute(savedRoute.route)
+    setStops(savedRoute.stops      || [])
+    setDirections(savedRoute.directions || [])
+    setRevealed((savedRoute.stops  || []).length)
+    setActiveTab('weather')
+    setScreen('results')
+    setSavedRoute(null)
+  }
+
+  function dismissSaved() { setSavedRoute(null) }
 
   async function handleSearch() {
     setError('')
@@ -442,6 +469,32 @@ export default function RouteSkies({ onBack }) {
                 Time-adjusted forecasts at every stop on your drive.
               </p>
             </div>
+
+            {/* RESUME LAST ROUTE */}
+            {savedRoute?.route && (
+              <div className="rise" style={{ background:'rgba(52,211,153,0.06)', border:'1px solid rgba(52,211,153,0.25)', borderRadius:14, padding:'13px 16px', marginBottom:14 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:10 }}>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontFamily:"'Fira Code',monospace", fontSize:10, color:'#34d399', letterSpacing:'.08em', marginBottom:4 }}>
+                      LAST ROUTE · {savedRoute.savedAt ? timeAgo(savedRoute.savedAt) : 'saved'}
+                    </div>
+                    <div style={{ fontSize:17, fontWeight:800, color:'#f1f5f9' }}>
+                      {(savedRoute.origin || savedRoute.route.origin || '').split(',')[0]}
+                      <span style={{ color:'#fbbf24', margin:'0 6px' }}>→</span>
+                      {(savedRoute.dest   || savedRoute.route.dest   || '').split(',')[0]}
+                    </div>
+                    <div style={{ fontFamily:"'Fira Code',monospace", fontSize:11, color:'#64748b', marginTop:2 }}>
+                      {savedRoute.route.totalMiles}mi · ~{fmtTot(savedRoute.route.totalMin)}
+                      {savedRoute.stops?.length ? ` · ${savedRoute.stops.length} stops` : ''}
+                    </div>
+                  </div>
+                  <button onClick={dismissSaved} style={{ background:'none', border:'none', color:'#334155', cursor:'pointer', fontSize:18, lineHeight:1, padding:'2px 4px', flexShrink:0 }}>✕</button>
+                </div>
+                <button className="btn-primary" style={{ marginTop:12, fontSize:15, padding:'11px 0' }} onClick={restoreRoute}>
+                  Resume This Route →
+                </button>
+              </div>
+            )}
 
             <div style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:16, padding:'20px 18px', display:'flex', flexDirection:'column', gap:14 }}>
 
@@ -696,7 +749,7 @@ export default function RouteSkies({ onBack }) {
 
             {!loading && revealed>=stops.length && stops.length>0 && (
               <div className="rise no-print" style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8, marginTop:18 }}>
-                <button className="btn-save" onClick={() => { setSaved(true); try{localStorage.setItem('rs_last',JSON.stringify({route,stops}))}catch(e){} setTimeout(()=>setSaved(false),3000) }}>
+                <button className="btn-save" onClick={() => { setSaved(true); try{localStorage.setItem('rs_last',JSON.stringify({route,stops,directions,origin,dest,date,timeHour,savedAt:Date.now()}))}catch(e){} setTimeout(()=>setSaved(false),3000) }}>
                   {saved?'✅ Saved!':'📴 Save Offline'}
                 </button>
                 <button className="btn-ghost" onClick={() => window.print()}>🖨️ Print</button>
