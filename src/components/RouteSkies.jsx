@@ -116,6 +116,22 @@ function extractState(addr) {
   return seg.match(/\b([A-Z]{2})\b/)?.[1] || ''
 }
 
+// Strip HTML tags from Google's html_instructions
+function stripHtml(html) {
+  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
+const MANEUVER_ICON = {
+  'turn-left':'↰',       'turn-slight-left':'↖',  'turn-sharp-left':'◀',
+  'turn-right':'↱',      'turn-slight-right':'↗',  'turn-sharp-right':'▶',
+  'uturn-left':'↩',      'uturn-right':'↪',
+  'ramp-left':'↖',       'ramp-right':'↗',
+  'fork-left':'↖',       'fork-right':'↗',
+  'merge':'⬆',           'straight':'⬆',
+  'roundabout-left':'↺', 'roundabout-right':'↻',
+  'ferry':'⛴',           'ferry-train':'🚂',
+}
+
 // ─────────────────────────────────────────────────────────────────
 // ROUTING ENGINE — calls our Next.js API route (server-side)
 // ─────────────────────────────────────────────────────────────────
@@ -159,7 +175,14 @@ async function getRoute(origin, dest, routeType) {
     }
   }))
 
-  return { waypoints: named, totalMiles, totalMin }
+  const directions = legs.flatMap(l => l.steps).map(s => ({
+    instruction: stripHtml(s.html_instructions),
+    distance:    s.distance.text,
+    duration:    s.duration.text,
+    maneuver:    s.maneuver || '',
+  }))
+
+  return { waypoints: named, totalMiles, totalMin, directions }
 }
 
 function selectByDistance(points, max) {
@@ -266,6 +289,8 @@ export default function RouteSkies({ onBack }) {
   const [addSlots,  setAddSlots]  = useState({})
   const [oSug,      setOSug]      = useState([])
   const [dSug,      setDSug]      = useState([])
+  const [directions, setDirections] = useState([])
+  const [activeTab,  setActiveTab]  = useState('weather')
 
   async function handleSearch() {
     setError('')
@@ -273,11 +298,13 @@ export default function RouteSkies({ onBack }) {
     setLoading(true)
     setScreen('results')
     setStops([])
+    setDirections([])
     setRevealed(0)
     setAddSlots({})
+    setActiveTab('weather')
 
     try {
-      const { waypoints, totalMiles, totalMin } = await getRoute(origin, dest, routeType)
+      const { waypoints, totalMiles, totalMin, directions } = await getRoute(origin, dest, routeType)
       const dh    = parseInt(timeHour)
       const month = new Date(date).getMonth()
       setRoute({ origin, dest, totalMiles, totalMin })
@@ -295,6 +322,7 @@ export default function RouteSkies({ onBack }) {
       )
 
       setStops(liveStops)
+      setDirections(directions)
       let i = 0
       const iv = setInterval(() => { i++; setRevealed(i); if (i >= liveStops.length) clearInterval(iv) }, 190)
     } catch (e) {
@@ -394,7 +422,7 @@ export default function RouteSkies({ onBack }) {
             <span style={{ fontFamily:"'Fira Code',monospace", fontSize:9, color:'#fbbf24', background:'rgba(251,191,36,0.12)', border:'1px solid rgba(251,191,36,0.25)', padding:'2px 6px', borderRadius:4 }}>BETA</span>
           </div>
           <div style={{ display:'flex', gap:8 }}>
-            {screen==='results' && <button className="btn-ghost" style={{ fontSize:12, padding:'6px 12px' }} onClick={() => { setScreen('home'); setStops([]) }}>← New Route</button>}
+            {screen==='results' && <button className="btn-ghost" style={{ fontSize:12, padding:'6px 12px' }} onClick={() => { setScreen('home'); setStops([]); setDirections([]); setActiveTab('weather') }}>← New Route</button>}
             {onBack && <button className="btn-ghost" style={{ fontSize:12, padding:'6px 12px' }} onClick={onBack}>🏠 Home</button>}
           </div>
         </div>
@@ -536,7 +564,29 @@ export default function RouteSkies({ onBack }) {
               </div>
             )}
 
-            {!loading && alerts.length>0 && revealed>=stops.length && (
+            {/* TAB SWITCHER */}
+            {!loading && stops.length>0 && revealed>=stops.length && (
+              <div className="no-print rise" style={{ display:'flex', gap:4, marginBottom:14, background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:12, padding:4 }}>
+                {[
+                  { id:'weather',    label:'🌦️ Weather Stops' },
+                  { id:'directions', label:'🗺️ Turn-by-Turn'  },
+                ].map(tab => (
+                  <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
+                    flex:1, padding:'8px 0', border:'none', borderRadius:9, cursor:'pointer',
+                    fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'.05em',
+                    transition:'all .2s',
+                    background: activeTab===tab.id ? 'rgba(251,191,36,0.15)' : 'transparent',
+                    color:      activeTab===tab.id ? '#fbbf24' : '#475569',
+                    boxShadow:  activeTab===tab.id ? 'inset 0 0 0 1px rgba(251,191,36,0.3)' : 'none',
+                  }}>
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* WEATHER TAB */}
+            {!loading && activeTab==='weather' && alerts.length>0 && revealed>=stops.length && (
               <div className="rise" style={{ background:'rgba(248,113,113,0.08)', border:'1px solid rgba(248,113,113,0.28)', borderRadius:12, padding:'11px 15px', marginBottom:12, display:'flex', gap:10, alignItems:'flex-start' }}>
                 <span style={{ fontSize:17, flexShrink:0 }}>⚠️</span>
                 <div>
@@ -548,7 +598,7 @@ export default function RouteSkies({ onBack }) {
               </div>
             )}
 
-            {stops.map((wp, i) => {
+            {activeTab==='weather' && stops.map((wp, i) => {
               if (i >= revealed) return null
               const color     = SCOL[wp.severity]||'#94a3b8'
               const bg        = SBG[wp.severity]||'rgba(148,163,184,0.07)'
@@ -625,13 +675,32 @@ export default function RouteSkies({ onBack }) {
               )
             })}
 
+            {/* DIRECTIONS TAB */}
+            {!loading && activeTab==='directions' && directions.length>0 && (
+              <div className="rise" style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, overflow:'hidden' }}>
+                {directions.map((step, i) => (
+                  <div key={i} style={{ display:'flex', gap:12, padding:'11px 14px', borderBottom: i < directions.length-1 ? '1px solid rgba(255,255,255,0.05)' : 'none', alignItems:'flex-start' }}>
+                    <div style={{ width:30, height:30, borderRadius:'50%', background:'rgba(251,191,36,0.08)', border:'1px solid rgba(251,191,36,0.18)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:14, color:'#fbbf24' }}>
+                      {MANEUVER_ICON[step.maneuver] || '⬆'}
+                    </div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:14, color:'#e2e8f0', lineHeight:1.45 }}>{step.instruction}</div>
+                      <div style={{ fontFamily:"'Fira Code',monospace", fontSize:10, color:'#475569', marginTop:3 }}>
+                        {step.distance}&nbsp;·&nbsp;{step.duration}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {!loading && revealed>=stops.length && stops.length>0 && (
               <div className="rise no-print" style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8, marginTop:18 }}>
                 <button className="btn-save" onClick={() => { setSaved(true); try{localStorage.setItem('rs_last',JSON.stringify({route,stops}))}catch(e){} setTimeout(()=>setSaved(false),3000) }}>
                   {saved?'✅ Saved!':'📴 Save Offline'}
                 </button>
                 <button className="btn-ghost" onClick={() => window.print()}>🖨️ Print</button>
-                <button className="btn-ghost" onClick={() => { setScreen('home'); setStops([]) }}>← New Route</button>
+                <button className="btn-ghost" onClick={() => { setScreen('home'); setStops([]); setDirections([]); setActiveTab('weather') }}>← New Route</button>
               </div>
             )}
 
