@@ -388,7 +388,7 @@ export default function RouteSkies({ onBack }) {
   const dh     = parseInt(timeHour)
 
   return (
-    <div style={{ minHeight:'100vh', background:'#07091A', fontFamily:"'Barlow Condensed',sans-serif", color:'#e2e8f0' }}>
+    <div style={{ minHeight:'100vh', background:'#0f1520', fontFamily:"'Barlow Condensed',sans-serif", color:'#e2e8f0' }}>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0;}
         .rise{animation:riseIn .4s cubic-bezier(.22,.68,0,1.2) both;}
@@ -401,37 +401,37 @@ export default function RouteSkies({ onBack }) {
         @keyframes spin{to{transform:rotate(360deg);}}
 
         .inp{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#f1f5f9;font-family:'Fira Code',monospace;font-size:13px;outline:none;transition:border-color .2s,background .2s;}
-        .inp:focus{border-color:rgba(251,191,36,.5);background:rgba(255,255,255,0.08);}
+        .inp:focus{border-color:rgba(33,150,243,.5);background:rgba(255,255,255,0.08);}
         .inp::placeholder{color:#334155;}
 
-        .btn-primary{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#07091A;border:none;border-radius:12px;padding:14px 0;width:100%;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 0 32px rgba(251,191,36,0.3);transition:transform .15s,box-shadow .15s;}
-        .btn-primary:hover{transform:scale(1.02);box-shadow:0 0 44px rgba(251,191,36,0.5);}
+        .btn-primary{background:linear-gradient(135deg,#2196F3,#1976D2);color:#0f1520;border:none;border-radius:12px;padding:14px 0;width:100%;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 0 32px rgba(33,150,243,0.3);transition:transform .15s,box-shadow .15s;}
+        .btn-primary:hover{transform:scale(1.02);box-shadow:0 0 44px rgba(33,150,243,0.5);}
         .btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
         .btn-ghost{background:rgba(255,255,255,0.05);color:#94a3b8;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
         .btn-ghost:hover{background:rgba(255,255,255,0.09);color:#e2e8f0;}
         .btn-save{background:rgba(52,211,153,0.1);color:#34d399;border:1px solid rgba(52,211,153,0.3);border-radius:10px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
         .btn-save:hover{background:rgba(52,211,153,0.18);}
-        .btn-add-stop{background:none;border:1px dashed rgba(251,191,36,0.3);border-radius:8px;color:#64748b;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:6px 14px;cursor:pointer;flex:1;transition:all .2s;}
-        .btn-add-stop:hover{border-color:rgba(251,191,36,0.7);color:#fbbf24;background:rgba(251,191,36,0.06);}
+        .btn-add-stop{background:none;border:1px dashed rgba(33,150,243,0.3);border-radius:8px;color:#64748b;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:6px 14px;cursor:pointer;flex:1;transition:all .2s;}
+        .btn-add-stop:hover{border-color:rgba(33,150,243,0.7);color:#2196F3;background:rgba(33,150,243,0.06);}
         .btn-remove{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:6px;color:#f87171;font-size:11px;font-weight:700;font-family:'Barlow Condensed',sans-serif;padding:3px 9px;cursor:pointer;transition:all .15s;flex-shrink:0;}
         .btn-remove:hover{background:rgba(248,113,113,0.22);}
         .route-pill{padding:9px 12px;border-radius:10px;cursor:pointer;border:1px solid transparent;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:'Barlow Condensed',sans-serif;}
-        .sug-box{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:50;background:#0f1628;border:1px solid rgba(251,191,36,0.2);border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
+        .sug-box{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:50;background:#0f1628;border:1px solid rgba(33,150,243,0.2);border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
         .sug-item{padding:9px 14px;font-family:'Fira Code',monospace;font-size:12px;color:#94a3b8;cursor:pointer;transition:background .15s;display:flex;gap:8px;align-items:center;}
-        .sug-item:hover{background:rgba(251,191,36,0.1);color:#f1f5f9;}
-        .sug-badge{font-size:10px;color:#fbbf24;background:rgba(251,191,36,0.12);padding:1px 6px;border-radius:4px;flex-shrink:0;}
+        .sug-item:hover{background:rgba(33,150,243,0.1);color:#f1f5f9;}
+        .sug-badge{font-size:10px;color:#2196F3;background:rgba(33,150,243,0.12);padding:1px 6px;border-radius:4px;flex-shrink:0;}
         ::-webkit-scrollbar{width:3px;}
         ::-webkit-scrollbar-thumb{background:#1e2a44;border-radius:3px;}
         @media print{.no-print{display:none!important;}body{background:white!important;color:#111!important;}}
       `}</style>
 
       {/* HEADER */}
-      <div className="no-print" style={{ background:'linear-gradient(180deg,#0d1428 0%,#07091A 100%)', borderBottom:'1px solid rgba(251,191,36,0.15)', padding:'15px 20px 11px', position:'sticky', top:0, zIndex:30 }}>
+      <div className="no-print" style={{ background:'linear-gradient(180deg,#151f2e 0%,#0f1520 100%)', borderBottom:'1px solid rgba(33,150,243,0.15)', padding:'15px 20px 11px', position:'sticky', top:0, zIndex:30 }}>
         <div style={{ maxWidth:580, margin:'0 auto', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <div style={{ display:'flex', alignItems:'center', gap:10, cursor:onBack?'pointer':'default' }} onClick={onBack}>
             <span style={{ fontSize:20 }}>🛣️</span>
-            <span style={{ fontSize:21, fontWeight:900, letterSpacing:'.1em', color:'#fbbf24', textShadow:'0 0 24px rgba(251,191,36,.4)', textTransform:'uppercase' }}>RouteSkies</span>
-            <span style={{ fontFamily:"'Fira Code',monospace", fontSize:9, color:'#fbbf24', background:'rgba(251,191,36,0.12)', border:'1px solid rgba(251,191,36,0.25)', padding:'2px 6px', borderRadius:4 }}>BETA</span>
+            <span style={{ fontSize:21, fontWeight:900, letterSpacing:'.1em', color:'#2196F3', textShadow:'0 0 24px rgba(33,150,243,.4)', textTransform:'uppercase' }}>RouteSkies</span>
+            <span style={{ fontFamily:"'Fira Code',monospace", fontSize:9, color:'#2196F3', background:'rgba(33,150,243,0.12)', border:'1px solid rgba(33,150,243,0.25)', padding:'2px 6px', borderRadius:4 }}>BETA</span>
           </div>
           <div style={{ display:'flex', gap:8 }}>
             {screen==='results' && <button className="btn-ghost" style={{ fontSize:12, padding:'6px 12px' }} onClick={() => { setScreen('home'); setStops([]); setDirections([]); setActiveTab('weather') }}>← New Route</button>}
@@ -448,7 +448,7 @@ export default function RouteSkies({ onBack }) {
             <div style={{ textAlign:'center', padding:'24px 0 28px' }}>
               <div style={{ fontSize:48, marginBottom:10 }}>🌦️</div>
               <h1 style={{ fontSize:28, fontWeight:900, letterSpacing:'.04em', color:'#f1f5f9', lineHeight:1.2, marginBottom:8 }}>
-                See weather where<br/><em style={{ color:'#fbbf24' }}>you'll actually be.</em>
+                See weather where<br/><em style={{ color:'#2196F3' }}>you'll actually be.</em>
               </h1>
               <p style={{ fontSize:14, color:'#64748b', lineHeight:1.8, maxWidth:300, margin:'0 auto' }}>
                 Time-adjusted forecasts at every stop on your drive.
@@ -465,7 +465,7 @@ export default function RouteSkies({ onBack }) {
                     </div>
                     <div style={{ fontSize:17, fontWeight:800, color:'#f1f5f9' }}>
                       {(savedRoute.origin || savedRoute.route.origin || '').split(',')[0]}
-                      <span style={{ color:'#fbbf24', margin:'0 6px' }}>→</span>
+                      <span style={{ color:'#2196F3', margin:'0 6px' }}>→</span>
                       {(savedRoute.dest   || savedRoute.route.dest   || '').split(',')[0]}
                     </div>
                     <div style={{ fontFamily:"'Fira Code',monospace", fontSize:11, color:'#64748b', marginTop:2 }}>
@@ -490,7 +490,7 @@ export default function RouteSkies({ onBack }) {
                   {ROUTE_OPTS.map(o => {
                     const active = routeType===o.id
                     return (
-                      <button key={o.id} className="route-pill" onClick={() => setRouteType(o.id)} style={{ background:active?'rgba(251,191,36,0.12)':'rgba(255,255,255,0.04)', border:active?'1px solid rgba(251,191,36,0.5)':'1px solid rgba(255,255,255,0.08)', color:active?'#fbbf24':'#64748b' }}>
+                      <button key={o.id} className="route-pill" onClick={() => setRouteType(o.id)} style={{ background:active?'rgba(33,150,243,0.12)':'rgba(255,255,255,0.04)', border:active?'1px solid rgba(33,150,243,0.5)':'1px solid rgba(255,255,255,0.08)', color:active?'#2196F3':'#64748b' }}>
                         <span style={{ fontSize:18 }}>{o.icon}</span>
                         <span style={{ fontSize:13, fontWeight:800 }}>{o.label}</span>
                         <span style={{ fontSize:10, fontFamily:"'Fira Code',monospace", opacity:.7, textTransform:'none', letterSpacing:0 }}>{o.desc}</span>
@@ -564,7 +564,7 @@ export default function RouteSkies({ onBack }) {
               </button>
             </div>
 
-            <div style={{ marginTop:16, padding:'10px 14px', borderRadius:10, background:'rgba(251,191,36,0.04)', border:'1px solid rgba(251,191,36,0.09)', textAlign:'center' }}>
+            <div style={{ marginTop:16, padding:'10px 14px', borderRadius:10, background:'rgba(33,150,243,0.04)', border:'1px solid rgba(33,150,243,0.09)', textAlign:'center' }}>
               <div style={{ fontSize:10, color:'#334155', fontFamily:"'Fira Code',monospace", lineHeight:1.8 }}>
                 Real routes via Google Maps · Live weather via Open-Meteo · Works anywhere in the US
               </div>
@@ -577,8 +577,8 @@ export default function RouteSkies({ onBack }) {
           <>
             {loading && (
               <div style={{ textAlign:'center', padding:'48px 20px' }}>
-                <div style={{ width:40, height:40, border:'3px solid rgba(251,191,36,0.2)', borderTop:'3px solid #fbbf24', borderRadius:'50%', margin:'0 auto 16px' }} className="spin" />
-                <div style={{ color:'#fbbf24', fontSize:13, fontFamily:"'Fira Code',monospace", letterSpacing:'.06em' }}>Planning your route...</div>
+                <div style={{ width:40, height:40, border:'3px solid rgba(33,150,243,0.2)', borderTop:'3px solid #2196F3', borderRadius:'50%', margin:'0 auto 16px' }} className="spin" />
+                <div style={{ color:'#2196F3', fontSize:13, fontFamily:"'Fira Code',monospace", letterSpacing:'.06em' }}>Planning your route...</div>
                 <div style={{ color:'#334155', fontSize:11, fontFamily:"'Fira Code',monospace", marginTop:6 }}>Fetching live weather for each stop</div>
               </div>
             )}
@@ -587,7 +587,7 @@ export default function RouteSkies({ onBack }) {
               <div className="rise" style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, padding:'13px 16px', marginBottom:14, display:'flex', flexWrap:'wrap', gap:8, alignItems:'center', justifyContent:'space-between' }}>
                 <div>
                   <div style={{ fontSize:18, fontWeight:800, color:'#f1f5f9' }}>
-                    {origin.split(',')[0]} <span style={{ color:'#fbbf24' }}>→</span> {dest.split(',')[0]}
+                    {origin.split(',')[0]} <span style={{ color:'#2196F3' }}>→</span> {dest.split(',')[0]}
                   </div>
                   <div style={{ fontFamily:"'Fira Code',monospace", fontSize:11, color:'#64748b', marginTop:2 }}>
                     {new Date(date+'T12:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
@@ -613,9 +613,9 @@ export default function RouteSkies({ onBack }) {
                     flex:1, padding:'8px 0', border:'none', borderRadius:9, cursor:'pointer',
                     fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'.05em',
                     transition:'all .2s',
-                    background: activeTab===tab.id ? 'rgba(251,191,36,0.15)' : 'transparent',
-                    color:      activeTab===tab.id ? '#fbbf24' : '#475569',
-                    boxShadow:  activeTab===tab.id ? 'inset 0 0 0 1px rgba(251,191,36,0.3)' : 'none',
+                    background: activeTab===tab.id ? 'rgba(33,150,243,0.15)' : 'transparent',
+                    color:      activeTab===tab.id ? '#2196F3' : '#475569',
+                    boxShadow:  activeTab===tab.id ? 'inset 0 0 0 1px rgba(33,150,243,0.3)' : 'none',
                   }}>
                     {tab.label}
                   </button>
@@ -659,7 +659,7 @@ export default function RouteSkies({ onBack }) {
                           <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:3, flexWrap:'wrap' }}>
                             <span style={{ fontSize:16, fontWeight:800, color:'#f1f5f9' }}>{wp.name}</span>
                             {wp.state && <span style={{ fontFamily:"'Fira Code',monospace", fontSize:10, color:'#475569', background:'rgba(255,255,255,0.05)', padding:'1px 5px', borderRadius:4 }}>{wp.state}</span>}
-                            {wp.isStart && <span style={{ fontSize:9, fontWeight:800, color:'#fbbf24', letterSpacing:'.08em' }}>START</span>}
+                            {wp.isStart && <span style={{ fontSize:9, fontWeight:800, color:'#2196F3', letterSpacing:'.08em' }}>START</span>}
                             {wp.isEnd   && <span style={{ fontSize:9, fontWeight:800, color:'#34d399', letterSpacing:'.08em' }}>DEST</span>}
                             {wp.custom  && <span style={{ fontSize:9, fontWeight:700, color:'#a78bfa' }}>CUSTOM</span>}
                             {!wp.isStart && !wp.isEnd && revealed>=stops.length && (
@@ -718,7 +718,7 @@ export default function RouteSkies({ onBack }) {
               <div className="rise" style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, overflow:'hidden' }}>
                 {directions.map((step, i) => (
                   <div key={i} style={{ display:'flex', gap:12, padding:'11px 14px', borderBottom: i < directions.length-1 ? '1px solid rgba(255,255,255,0.05)' : 'none', alignItems:'flex-start' }}>
-                    <div style={{ width:30, height:30, borderRadius:'50%', background:'rgba(251,191,36,0.08)', border:'1px solid rgba(251,191,36,0.18)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:14, color:'#fbbf24' }}>
+                    <div style={{ width:30, height:30, borderRadius:'50%', background:'rgba(33,150,243,0.08)', border:'1px solid rgba(33,150,243,0.18)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:14, color:'#2196F3' }}>
                       {MANEUVER_ICON[step.maneuver] || '⬆'}
                     </div>
                     <div style={{ flex:1, minWidth:0 }}>
@@ -743,7 +743,7 @@ export default function RouteSkies({ onBack }) {
             )}
 
             {!loading && stops.length>0 && (
-              <div style={{ marginTop:12, padding:'10px 14px', borderRadius:10, background:'rgba(251,191,36,0.03)', border:'1px solid rgba(251,191,36,0.08)', textAlign:'center' }}>
+              <div style={{ marginTop:12, padding:'10px 14px', borderRadius:10, background:'rgba(33,150,243,0.03)', border:'1px solid rgba(33,150,243,0.08)', textAlign:'center' }}>
                 <div style={{ fontSize:10, color:'#334155', fontFamily:"'Fira Code',monospace", lineHeight:1.8 }}>
                   Real routes via Google Maps · Live weather via Open-Meteo · Arrival times approx at 65mph
                 </div>
