@@ -54,6 +54,7 @@ export default function Landing({ onLaunchApp }) {
         nav { position:fixed; top:0; left:0; right:0; z-index:100; background:rgba(7,9,26,.92); backdrop-filter:blur(12px); border-bottom:1px solid rgba(251,191,36,.12); padding:14px 24px; }
         .nav-inner { max-width:1100px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; }
         .nav-logo { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:.1em; color:var(--amber); text-shadow:0 0 24px rgba(251,191,36,.4); display:flex; align-items:center; gap:8px; cursor:pointer; }
+        .beta-badge { font-family:system-ui,sans-serif; font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--dark); background:var(--amber); padding:2px 7px; border-radius:4px; line-height:1.6; align-self:center; margin-bottom:2px; }
         .nav-links { display:flex; align-items:center; gap:24px; }
         .nav-links a { font-size:14px; font-weight:500; color:var(--text2); transition:color .2s; }
         .nav-links a:hover { color:var(--text); }
@@ -174,7 +175,7 @@ export default function Landing({ onLaunchApp }) {
       {/* NAV */}
       <nav>
         <div className="nav-inner">
-          <div className="nav-logo">🛣️ RouteSkies</div>
+          <div className="nav-logo">🛣️ RouteSkies <span className="beta-badge">Beta</span></div>
           <div className="nav-links">
             <a href="#how">How It Works</a>
             <a href="#who">Who It's For</a>

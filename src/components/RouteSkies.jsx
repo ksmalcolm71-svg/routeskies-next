@@ -202,50 +202,35 @@ function selectByDistance(points, max) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// WEATHER ENGINE — Open-Meteo (free, no key, works server-to-server)
+// WEATHER ENGINE — Tomorrow.io (server-side via /api/weather)
 // ─────────────────────────────────────────────────────────────────
-function wxCode(code) {
-  if (code === 0)  return { condition: 'Clear Sky',     severity: 'clear'      }
-  if (code <= 2)   return { condition: 'Mostly Clear',  severity: 'clear'      }
-  if (code === 3)  return { condition: 'Overcast',      severity: 'cloudy'     }
-  if (code <= 48)  return { condition: 'Foggy',         severity: 'cloudy'     }
-  if (code <= 55)  return { condition: 'Drizzle',       severity: 'light-rain' }
-  if (code <= 65)  return { condition: 'Rain',          severity: 'rain'       }
-  if (code <= 77)  return { condition: 'Snow',          severity: 'snow'       }
-  if (code <= 82)  return { condition: 'Rain Showers',  severity: 'rain'       }
-  if (code === 95) return { condition: 'Thunderstorm',  severity: 'severe'     }
-  if (code >= 96)  return { condition: 'Severe Storm',  severity: 'severe'     }
-  return                  { condition: 'Partly Cloudy', severity: 'cloudy'     }
-}
-
 async function fetchWeather(lat, lon, dateStr, hour) {
-  const url = `https://api.open-meteo.com/v1/forecast` +
-    `?latitude=${lat}&longitude=${lon}` +
-    `&hourly=temperature_2m,precipitation_probability,weathercode,windspeed_10m,relativehumidity_2m` +
-    `&temperature_unit=fahrenheit&timezone=auto&forecast_days=3`
-  const res    = await fetch(url)
-  const data   = await res.json()
-  const target = `${dateStr}T${String(hour).padStart(2, '0')}:00`
-  const idx    = data.hourly.time.indexOf(target)
-  if (idx === -1) return null
-  const { condition, severity } = wxCode(data.hourly.weathercode[idx])
-  const icons = { clear: '☀️', cloudy: '⛅', 'light-rain': '🌦️', rain: '🌧️', severe: '⛈️', snow: '❄️' }
-  return {
-    temp:      Math.round(data.hourly.temperature_2m[idx]),
-    precipPct: data.hourly.precipitation_probability[idx],
-    wind:      Math.round(data.hourly.windspeed_10m[idx]),
-    humidity:  data.hourly.relativehumidity_2m[idx],
-    condition, severity,
-    icon: icons[severity] || '🌤️',
+  const params = new URLSearchParams({ lat, lon, date: dateStr, hour })
+  try {
+    const res  = await fetch(`/api/weather?${params}`)
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.error ? null : data
+  } catch {
+    return null
   }
 }
 
 function estimateWeather(lat, lon, hour, month) {
+  // Fallback when Tomorrow.io is unavailable — uses Tomorrow.io-style codes
   const seed  = Math.abs(Math.sin(lat * 127.1 + lon * 311.7 + hour * 17.3 + month * 53.2)) * 9999
   const rand  = n => Math.abs(Math.sin(seed + n * 91.3))
   const temp  = Math.round([52,55,62,70,77,83,86,85,80,71,62,54][month] + (lat-25)*-1.1 + (hour<12?-3:hour<16?4:0) + (rand(1)-.5)*9)
   const pp    = Math.round(Math.max(0, Math.min(95, 30 + (rand(2)-.38)*65)))
-  const { condition, severity } = wxCode(pp > 70 ? 95 : pp > 50 ? 61 : pp > 35 ? 51 : pp > 20 ? 2 : 0)
+  const TOMORROW_CODES = {
+    1000: { condition: 'Clear Sky',     severity: 'clear'      },
+    1101: { condition: 'Partly Cloudy', severity: 'cloudy'     },
+    4200: { condition: 'Light Rain',    severity: 'light-rain' },
+    4001: { condition: 'Rain',          severity: 'rain'       },
+    8000: { condition: 'Thunderstorm',  severity: 'severe'     },
+  }
+  const code = pp > 70 ? 8000 : pp > 50 ? 4001 : pp > 35 ? 4200 : pp > 20 ? 1101 : 1000
+  const { condition, severity } = TOMORROW_CODES[code]
   const icons = { clear:'☀️', cloudy:'⛅', 'light-rain':'🌦️', rain:'🌧️', severe:'⛈️', snow:'❄️' }
   return { temp, precipPct:pp, wind:Math.round(7+rand(3)*22), humidity:Math.round(48+rand(4)*44), condition, severity, icon:icons[severity]||'🌤️' }
 }
