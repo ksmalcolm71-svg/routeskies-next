@@ -405,8 +405,8 @@ export default function Landing({ onLaunchApp }) {
             <a href="#how">How It Works</a>
             <a href="#pricing">Pricing</a>
             <a href="#waitlist">Join Waitlist</a>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms</a>
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms</a>
           </div>
         </div>
         <div className="footer-copy">© 2026 RouteSkies · Nece Unified LLC · routeskies.com</div>
