@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import MapView from '@/components/MapView'
 
 // ─────────────────────────────────────────────────────────────────
 // CITY AUTOCOMPLETE DATABASE
@@ -182,7 +183,7 @@ async function getRoute(origin, dest, routeType) {
     maneuver:    s.maneuver || '',
   }))
 
-  return { waypoints: named, totalMiles, totalMin, directions }
+  return { waypoints: named, totalMiles, totalMin, directions, polyline: rawPts }
 }
 
 function selectByDistance(points, max) {
@@ -335,10 +336,10 @@ export default function RouteSkies({ onBack }) {
     setActiveTab('weather')
 
     try {
-      const { waypoints, totalMiles, totalMin, directions } = await getRoute(origin, dest, routeType)
+      const { waypoints, totalMiles, totalMin, directions, polyline } = await getRoute(origin, dest, routeType)
       const dh    = parseInt(timeHour)
       const month = new Date(date).getMonth()
-      setRoute({ origin, dest, totalMiles, totalMin })
+      setRoute({ origin, dest, totalMiles, totalMin, polyline })
 
       const liveStops = await Promise.all(
         waypoints.map(async (wp, i) => {
@@ -636,7 +637,8 @@ export default function RouteSkies({ onBack }) {
               <div className="no-print rise" style={{ display:'flex', gap:4, marginBottom:14, background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:12, padding:4 }}>
                 {[
                   { id:'weather',    label:'🌦️ Weather Stops' },
-                  { id:'directions', label:'🗺️ Turn-by-Turn'  },
+                  { id:'directions', label:'↗ Turn-by-Turn'   },
+                  { id:'map',        label:'🗺️ Map View'       },
                 ].map(tab => (
                   <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
                     flex:1, padding:'8px 0', border:'none', borderRadius:9, cursor:'pointer',
@@ -741,6 +743,17 @@ export default function RouteSkies({ onBack }) {
                 </div>
               )
             })}
+
+            {/* MAP TAB — always mounted once results are ready so the map instance
+                survives tab switches; hidden with display:none when inactive */}
+            {!loading && route && stops.length>0 && (
+              <MapView
+                route={route}
+                stops={stops}
+                departHour={dh}
+                active={activeTab==='map'}
+              />
+            )}
 
             {/* DIRECTIONS TAB */}
             {!loading && activeTab==='directions' && directions.length>0 && (
