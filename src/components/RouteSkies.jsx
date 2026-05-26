@@ -443,10 +443,62 @@ export default function RouteSkies({ onBack }) {
         ::-webkit-scrollbar{width:3px;}
         ::-webkit-scrollbar-thumb{background:#1e2a44;border-radius:3px;}
         @media print{.no-print{display:none!important;}body{background:white!important;color:#111!important;}}
+
+        @keyframes rs-drive{from{transform:translateY(0)}to{transform:translateY(84px)}}
       `}</style>
 
+      {/* ── ANIMATED ROAD BACKGROUND (home screen only) ──────────────────
+           position:fixed so it fills the full viewport behind everything;
+           opacity transition fades it away on results / other screens.    */}
+      <div aria-hidden="true" style={{
+        position:'fixed', inset:0, zIndex:0, pointerEvents:'none', overflow:'hidden',
+        opacity: screen==='home' ? 1 : 0,
+        transition: 'opacity 0.7s ease',
+      }}>
+        {/* Soft headlight glow rising from the bottom of the viewport */}
+        <div style={{
+          position:'absolute', bottom:0, left:'50%', transform:'translateX(-50%)',
+          width:'160%', height:'70%',
+          background:'radial-gradient(ellipse at bottom center, rgba(33,150,243,0.055) 0%, transparent 68%)',
+        }} />
+
+        {/* Very faint road-surface strip — centre of screen slightly lighter */}
+        <div style={{
+          position:'absolute', inset:0,
+          background:'linear-gradient(to right, transparent 20%, rgba(255,255,255,0.011) 42%, rgba(255,255,255,0.018) 50%, rgba(255,255,255,0.011) 58%, transparent 80%)',
+        }} />
+
+        {/* ── Animated lane-dash columns ──────────────────────────────
+             repeating-linear-gradient creates the dash pattern; animating
+             translateY by exactly one cycle (84 px = 28 dash + 56 gap)
+             makes it loop seamlessly. Different durations give depth.    */}
+        {[
+          // centre line — brightest, fastest (closest to driver)
+          { x:'50%',  w:2,   op:0.11, dur:'3.5s', delay:'0s'   },
+          // left lane marker — dimmer, slower (feels further away)
+          { x:'34.5%',w:1.5, op:0.04, dur:'5.2s', delay:'0.7s' },
+          // right lane marker
+          { x:'65.5%',w:1.5, op:0.04, dur:'5.2s', delay:'1.4s' },
+          // outer shoulder hints — very faint
+          { x:'18%',  w:1,   op:0.02, dur:'7s',   delay:'0.3s' },
+          { x:'82%',  w:1,   op:0.02, dur:'7s',   delay:'1.1s' },
+        ].map((l, i) => (
+          <div key={i} style={{
+            position:'absolute',
+            left:l.x,
+            transform:'translateX(-50%)',
+            width:l.w,
+            top:'-100px',
+            bottom:'-100px',
+            opacity:l.op,
+            background:'repeating-linear-gradient(to bottom,#2196F3 0,#2196F3 28px,transparent 28px,transparent 84px)',
+            animation:`rs-drive ${l.dur} ${l.delay} linear infinite`,
+          }} />
+        ))}
+      </div>
+
       {/* HEADER */}
-      <div className="no-print" style={{ background:'linear-gradient(180deg,#151f2e 0%,#0f1520 100%)', borderBottom:'1px solid rgba(33,150,243,0.15)', padding:'15px 20px 11px', position:'sticky', top:0, zIndex:30 }}>
+      <div className="no-print" style={{ background:'linear-gradient(180deg,#151f2e 0%,#0f1520 100%)', borderBottom:'1px solid rgba(33,150,243,0.15)', padding:'15px 20px 11px', position:'sticky', top:0, zIndex:30, isolation:'isolate' }}>
         <div style={{ maxWidth:580, margin:'0 auto', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <div style={{ display:'flex', alignItems:'center', gap:10, cursor:onBack?'pointer':'default' }} onClick={onBack}>
             <span style={{ fontSize:20 }}>🛣️</span>
@@ -470,7 +522,7 @@ export default function RouteSkies({ onBack }) {
         </div>
       </div>
 
-      <div style={{ maxWidth:580, margin:'0 auto', padding:'20px 16px 64px' }}>
+      <div style={{ maxWidth:580, margin:'0 auto', padding:'20px 16px 64px', position:'relative', zIndex:1 }}>
 
         {/* HOME */}
         {screen==='home' && (
