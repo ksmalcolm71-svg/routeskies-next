@@ -277,7 +277,26 @@ export default function RouteSkies({ onBack }) {
   const [dSug,      setDSug]      = useState([])
   const [directions, setDirections] = useState([])
   const [activeTab,  setActiveTab]  = useState('weather')
-  const [savedRoute, setSavedRoute] = useState(null)
+  const [savedRoute,    setSavedRoute]    = useState(null)
+  const [installPrompt, setInstallPrompt] = useState(null)
+  const [isInstalled,   setIsInstalled]   = useState(false)
+
+  // Capture the browser's install prompt and detect standalone mode
+  useEffect(() => {
+    const handler = (e) => { e.preventDefault(); setInstallPrompt(e) }
+    window.addEventListener('beforeinstallprompt', handler)
+    window.addEventListener('appinstalled', () => { setInstallPrompt(null); setIsInstalled(true) })
+    if (window.matchMedia('(display-mode: standalone)').matches) setIsInstalled(true)
+    return () => window.removeEventListener('beforeinstallprompt', handler)
+  }, [])
+
+  async function handleInstall() {
+    if (!installPrompt) return
+    installPrompt.prompt()
+    const { outcome } = await installPrompt.userChoice
+    if (outcome === 'accepted') setIsInstalled(true)
+    setInstallPrompt(null)
+  }
 
   // On mount, load any previously saved route from localStorage
   useEffect(() => {
@@ -433,9 +452,19 @@ export default function RouteSkies({ onBack }) {
             <span style={{ fontSize:21, fontWeight:900, letterSpacing:'.1em', color:'#2196F3', textShadow:'0 0 24px rgba(33,150,243,.4)', textTransform:'uppercase' }}>RouteSkies</span>
             <span style={{ fontFamily:"'Fira Code',monospace", fontSize:9, color:'#2196F3', background:'rgba(33,150,243,0.12)', border:'1px solid rgba(33,150,243,0.25)', padding:'2px 6px', borderRadius:4 }}>BETA</span>
           </div>
-          <div style={{ display:'flex', gap:8 }}>
+          <div style={{ display:'flex', gap:8, alignItems:'center' }}>
             {screen==='results' && <button className="btn-ghost" style={{ fontSize:12, padding:'6px 12px' }} onClick={() => { setScreen('home'); setStops([]); setDirections([]); setActiveTab('weather') }}>← New Route</button>}
             {onBack && <button className="btn-ghost" style={{ fontSize:12, padding:'6px 12px' }} onClick={onBack}>🏠 Home</button>}
+            {installPrompt && !isInstalled && (
+              <button onClick={handleInstall} style={{
+                fontSize:11, padding:'5px 10px', fontWeight:700, letterSpacing:'.05em',
+                background:'rgba(33,150,243,0.15)', color:'#2196F3',
+                border:'1px solid rgba(33,150,243,0.4)', borderRadius:8, cursor:'pointer',
+                display:'flex', alignItems:'center', gap:5, whiteSpace:'nowrap',
+              }}>
+                ⬇ Install App
+              </button>
+            )}
           </div>
         </div>
       </div>

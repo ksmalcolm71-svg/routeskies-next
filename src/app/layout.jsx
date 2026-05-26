@@ -1,3 +1,5 @@
+import ServiceWorkerRegistrar from '@/components/ServiceWorkerRegistrar'
+
 export const metadata = {
   title: 'RouteSkies — Weather Built for the Road',
   description: 'Time-adjusted weather forecasts for every mile of your drive. Built for truck drivers, field reps, and anyone who drives for a living.',
@@ -19,7 +21,8 @@ export default function RootLayout({ children }) {
           gtag('config', 'G-9830TLPCDK');
         `}} />
       </head>
-      <body style={{ margin: 0, padding: 0, background: '#07091A' }}>
+      <body style={{ margin: 0, padding: 0, background: '#0f1520' }}>
+        <ServiceWorkerRegistrar />
         {children}
       </body>
     </html>
