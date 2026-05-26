@@ -277,7 +277,7 @@ export default function RouteSkies({ onBack }) {
   const [oSug,      setOSug]      = useState([])
   const [dSug,      setDSug]      = useState([])
   const [directions, setDirections] = useState([])
-  const [activeTab,  setActiveTab]  = useState('weather')
+  const [activeTab,  setActiveTab]  = useState('map')
   const [savedRoute,    setSavedRoute]    = useState(null)
   const [installPrompt, setInstallPrompt] = useState(null)
   const [isInstalled,   setIsInstalled]   = useState(false)
@@ -317,7 +317,7 @@ export default function RouteSkies({ onBack }) {
     setStops(savedRoute.stops      || [])
     setDirections(savedRoute.directions || [])
     setRevealed((savedRoute.stops  || []).length)
-    setActiveTab('weather')
+    setActiveTab('map')
     setScreen('results')
     setSavedRoute(null)
   }
@@ -333,7 +333,7 @@ export default function RouteSkies({ onBack }) {
     setDirections([])
     setRevealed(0)
     setAddSlots({})
-    setActiveTab('weather')
+    setActiveTab('map')
 
     try {
       const { waypoints, totalMiles, totalMin, directions, polyline } = await getRoute(origin, dest, routeType)
@@ -454,7 +454,7 @@ export default function RouteSkies({ onBack }) {
             <span style={{ fontFamily:"'Fira Code',monospace", fontSize:9, color:'#2196F3', background:'rgba(33,150,243,0.12)', border:'1px solid rgba(33,150,243,0.25)', padding:'2px 6px', borderRadius:4 }}>BETA</span>
           </div>
           <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-            {screen==='results' && <button className="btn-ghost" style={{ fontSize:12, padding:'6px 12px' }} onClick={() => { setScreen('home'); setStops([]); setDirections([]); setActiveTab('weather') }}>← New Route</button>}
+            {screen==='results' && <button className="btn-ghost" style={{ fontSize:12, padding:'6px 12px' }} onClick={() => { setScreen('home'); setStops([]); setDirections([]); setActiveTab('map') }}>← New Route</button>}
             {onBack && <button className="btn-ghost" style={{ fontSize:12, padding:'6px 12px' }} onClick={onBack}>🏠 Home</button>}
             {installPrompt && !isInstalled && (
               <button onClick={handleInstall} style={{
@@ -636,9 +636,9 @@ export default function RouteSkies({ onBack }) {
             {!loading && stops.length>0 && revealed>=stops.length && (
               <div className="no-print rise" style={{ display:'flex', gap:4, marginBottom:14, background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:12, padding:4 }}>
                 {[
+                  { id:'map',        label:'🗺️ Map View'       },
                   { id:'weather',    label:'🌦️ Weather Stops' },
                   { id:'directions', label:'↗ Turn-by-Turn'   },
-                  { id:'map',        label:'🗺️ Map View'       },
                 ].map(tab => (
                   <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
                     flex:1, padding:'8px 0', border:'none', borderRadius:9, cursor:'pointer',
@@ -780,7 +780,7 @@ export default function RouteSkies({ onBack }) {
                   {saved?'✅ Saved!':'📴 Save Offline'}
                 </button>
                 <button className="btn-ghost" onClick={() => window.print()}>🖨️ Print</button>
-                <button className="btn-ghost" onClick={() => { setScreen('home'); setStops([]); setDirections([]); setActiveTab('weather') }}>← New Route</button>
+                <button className="btn-ghost" onClick={() => { setScreen('home'); setStops([]); setDirections([]); setActiveTab('map') }}>← New Route</button>
               </div>
             )}
 
