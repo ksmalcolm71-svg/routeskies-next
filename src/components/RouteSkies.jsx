@@ -249,8 +249,10 @@ const timeAgo = ts => { const m=Math.floor((Date.now()-ts)/60000); if(m<1) retur
 // ─────────────────────────────────────────────────────────────────
 // COLORS
 // ─────────────────────────────────────────────────────────────────
-const SCOL = { clear:'#34d399', cloudy:'#94a3b8', 'light-rain':'#7dd3fc', rain:'#60a5fa', severe:'#f87171', snow:'#e2e8f0' }
-const SBG  = { clear:'rgba(52,211,153,0.07)', cloudy:'rgba(148,163,184,0.07)', 'light-rain':'rgba(125,211,252,0.09)', rain:'rgba(96,165,250,0.10)', severe:'rgba(248,113,113,0.13)', snow:'rgba(226,232,240,0.08)' }
+// Severity accent colors — dark enough to be readable on white cards
+const SCOL = { clear:'#16a34a', cloudy:'#6b7280', 'light-rain':'#0284c7', rain:'#1d4ed8', severe:'#dc2626', snow:'#64748b' }
+// Card background tints — all white-based for the light theme
+const SBG  = { clear:'rgba(255,255,255,0.93)', cloudy:'rgba(255,255,255,0.93)', 'light-rain':'rgba(255,255,255,0.93)', rain:'rgba(255,255,255,0.93)', severe:'rgba(255,255,255,0.93)', snow:'rgba(255,255,255,0.93)' }
 
 const ROUTE_OPTS = [
   { id:'fastest', label:'Fastest',  icon:'⚡', desc:'Major interstates' },
@@ -401,7 +403,25 @@ export default function RouteSkies({ onBack }) {
   const dh     = parseInt(timeHour)
 
   return (
-    <div style={{ minHeight:'100vh', background:'#0f1520', fontFamily:"'Barlow Condensed',sans-serif", color:'#e2e8f0' }}>
+    <div style={{ minHeight:'100vh', background:'transparent', fontFamily:"'Barlow Condensed',sans-serif", color:'#1e2d23', position:'relative' }}>
+
+      {/* ── FIXED PHOTO BACKGROUND ───────────────────────────────────
+           position:fixed stays anchored while content scrolls.
+           38.jpg  → home / plan-route screen
+           istockphoto → results screen (aerial forest road)          */}
+      <div aria-hidden="true" style={{
+        position:'fixed', inset:0, zIndex:0, pointerEvents:'none',
+        backgroundImage: `url('/${screen==='home' ? '38.jpg' : 'istockphoto-860137690-612x612.jpg'}')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        transition: 'background-image 0.6s ease',
+      }} />
+      {/* White overlay — makes text and cards readable over the photos */}
+      <div aria-hidden="true" style={{
+        position:'fixed', inset:0, zIndex:0, pointerEvents:'none',
+        background: screen==='home' ? 'rgba(255,255,255,0.50)' : 'rgba(255,255,255,0.60)',
+        transition: 'background 0.6s ease',
+      }} />
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0;}
         .rise{animation:riseIn .4s cubic-bezier(.22,.68,0,1.2) both;}
@@ -420,24 +440,22 @@ export default function RouteSkies({ onBack }) {
         .btn-primary{background:linear-gradient(135deg,#2d6a4f,#1b4332);color:#fff;border:none;border-radius:12px;padding:14px 0;width:100%;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 4px 18px rgba(45,106,79,0.4);transition:transform .15s,box-shadow .15s;}
         .btn-primary:hover{transform:scale(1.02);box-shadow:0 6px 28px rgba(45,106,79,0.55);}
         .btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
-        .btn-ghost{background:rgba(255,255,255,0.05);color:#94a3b8;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
-        .btn-ghost:hover{background:rgba(255,255,255,0.09);color:#e2e8f0;}
-        .btn-save{background:rgba(52,211,153,0.1);color:#34d399;border:1px solid rgba(52,211,153,0.3);border-radius:10px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
-        .btn-save:hover{background:rgba(52,211,153,0.18);}
-        .btn-add-stop{background:none;border:1px dashed rgba(33,150,243,0.3);border-radius:8px;color:#64748b;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:6px 14px;cursor:pointer;flex:1;transition:all .2s;}
-        .btn-add-stop:hover{border-color:rgba(33,150,243,0.7);color:#2196F3;background:rgba(33,150,243,0.06);}
-        .btn-remove{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:6px;color:#f87171;font-size:11px;font-weight:700;font-family:'Barlow Condensed',sans-serif;padding:3px 9px;cursor:pointer;transition:all .15s;flex-shrink:0;}
-        .btn-remove:hover{background:rgba(248,113,113,0.22);}
+        .btn-ghost{background:rgba(255,255,255,0.88);color:#4a5e52;border:1px solid rgba(0,0,0,0.12);border-radius:10px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+        .btn-ghost:hover{background:#fff;color:#1e2d23;border-color:rgba(0,0,0,0.18);}
+        .btn-save{background:rgba(22,163,74,0.1);color:#16a34a;border:1px solid rgba(22,163,74,0.3);border-radius:10px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+        .btn-save:hover{background:rgba(22,163,74,0.18);}
+        .btn-add-stop{background:rgba(255,255,255,0.8);border:1px dashed rgba(45,106,79,0.4);border-radius:8px;color:#2d6a4f;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:6px 14px;cursor:pointer;flex:1;transition:all .2s;}
+        .btn-add-stop:hover{border-color:rgba(45,106,79,0.7);background:rgba(255,255,255,1);}
+        .btn-remove{background:rgba(220,38,38,0.07);border:1px solid rgba(220,38,38,0.25);border-radius:6px;color:#dc2626;font-size:11px;font-weight:700;font-family:'Barlow Condensed',sans-serif;padding:3px 9px;cursor:pointer;transition:all .15s;flex-shrink:0;}
+        .btn-remove:hover{background:rgba(220,38,38,0.14);}
         .route-pill{padding:9px 12px;border-radius:10px;cursor:pointer;border:1px solid transparent;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:'Barlow Condensed',sans-serif;}
         .sug-box{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:50;background:#fff;border:1.5px solid #d4ddd6;border-radius:10px;overflow:hidden;box-shadow:0 8px 28px rgba(30,45,35,0.12);}
         .sug-item{padding:10px 14px;font-family:'Barlow',sans-serif;font-size:14px;color:#4a5e52;cursor:pointer;transition:background .15s;display:flex;gap:8px;align-items:center;}
         .sug-item:hover{background:rgba(45,106,79,0.07);color:#1b4332;}
         .sug-badge{font-size:11px;color:#2d6a4f;background:rgba(45,106,79,0.1);padding:2px 7px;border-radius:4px;flex-shrink:0;font-weight:600;}
-        ::-webkit-scrollbar{width:3px;}
-        ::-webkit-scrollbar-thumb{background:#1e2a44;border-radius:3px;}
+        ::-webkit-scrollbar{width:4px;}
+        ::-webkit-scrollbar-thumb{background:#d4ddd6;border-radius:3px;}
         @media print{.no-print{display:none!important;}body{background:white!important;color:#111!important;}}
-
-        @keyframes rs-drive{from{transform:translateY(0)}to{transform:translateY(84px)}}
 
         /* ── Light form card (home screen only) ── */
         .form-card{background:#fff;border:1px solid #d4ddd6;border-radius:16px;padding:22px 20px;box-shadow:0 4px 24px rgba(30,45,35,0.09);}
@@ -448,56 +466,6 @@ export default function RouteSkies({ onBack }) {
         .home-hero-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(26px,5vw,36px);color:#1b4332;line-height:1.15;margin-bottom:6px;}
         .home-hero-sub{font-size:14px;color:#4a5e52;line-height:1.7;max-width:320px;}
       `}</style>
-
-      {/* ── ANIMATED ROAD BACKGROUND (home screen only) ──────────────────
-           position:fixed so it fills the full viewport behind everything;
-           opacity transition fades it away on results / other screens.    */}
-      <div aria-hidden="true" style={{
-        position:'fixed', inset:0, zIndex:0, pointerEvents:'none', overflow:'hidden',
-        opacity: screen==='home' ? 1 : 0,
-        transition: 'opacity 0.7s ease',
-      }}>
-        {/* Soft headlight glow rising from the bottom of the viewport */}
-        <div style={{
-          position:'absolute', bottom:0, left:'50%', transform:'translateX(-50%)',
-          width:'160%', height:'70%',
-          background:'radial-gradient(ellipse at bottom center, rgba(33,150,243,0.055) 0%, transparent 68%)',
-        }} />
-
-        {/* Very faint road-surface strip — centre of screen slightly lighter */}
-        <div style={{
-          position:'absolute', inset:0,
-          background:'linear-gradient(to right, transparent 20%, rgba(255,255,255,0.011) 42%, rgba(255,255,255,0.018) 50%, rgba(255,255,255,0.011) 58%, transparent 80%)',
-        }} />
-
-        {/* ── Animated lane-dash columns ──────────────────────────────
-             repeating-linear-gradient creates the dash pattern; animating
-             translateY by exactly one cycle (84 px = 28 dash + 56 gap)
-             makes it loop seamlessly. Different durations give depth.    */}
-        {[
-          // centre line — brightest, fastest (closest to driver)
-          { x:'50%',  w:2,   op:0.11, dur:'3.5s', delay:'0s'   },
-          // left lane marker — dimmer, slower (feels further away)
-          { x:'34.5%',w:1.5, op:0.04, dur:'5.2s', delay:'0.7s' },
-          // right lane marker
-          { x:'65.5%',w:1.5, op:0.04, dur:'5.2s', delay:'1.4s' },
-          // outer shoulder hints — very faint
-          { x:'18%',  w:1,   op:0.02, dur:'7s',   delay:'0.3s' },
-          { x:'82%',  w:1,   op:0.02, dur:'7s',   delay:'1.1s' },
-        ].map((l, i) => (
-          <div key={i} style={{
-            position:'absolute',
-            left:l.x,
-            transform:'translateX(-50%)',
-            width:l.w,
-            top:'-100px',
-            bottom:'-100px',
-            opacity:l.op,
-            background:'repeating-linear-gradient(to bottom,#4a7c59 0,#4a7c59 28px,transparent 28px,transparent 84px)',
-            animation:`rs-drive ${l.dur} ${l.delay} linear infinite`,
-          }} />
-        ))}
-      </div>
 
       {/* HEADER */}
       <div className="no-print" style={{ background:'rgba(247,249,247,0.97)', backdropFilter:'blur(10px)', borderBottom:'1px solid #d4ddd6', padding:'13px 20px', position:'sticky', top:0, zIndex:30, isolation:'isolate' }}>
@@ -652,27 +620,27 @@ export default function RouteSkies({ onBack }) {
         {screen==='results' && (
           <>
             {loading && (
-              <div style={{ textAlign:'center', padding:'48px 20px' }}>
-                <div style={{ width:40, height:40, border:'3px solid rgba(33,150,243,0.2)', borderTop:'3px solid #2196F3', borderRadius:'50%', margin:'0 auto 16px' }} className="spin" />
-                <div style={{ color:'#2196F3', fontSize:13, fontFamily:"'Fira Code',monospace", letterSpacing:'.06em' }}>Planning your route...</div>
-                <div style={{ color:'#334155', fontSize:11, fontFamily:"'Fira Code',monospace", marginTop:6 }}>Fetching live weather for each stop</div>
+              <div style={{ textAlign:'center', padding:'60px 20px', background:'rgba(255,255,255,0.88)', borderRadius:16, boxShadow:'0 4px 24px rgba(0,0,0,0.09)' }}>
+                <div style={{ width:44, height:44, border:'3px solid rgba(45,106,79,0.2)', borderTop:'3px solid #2d6a4f', borderRadius:'50%', margin:'0 auto 18px' }} className="spin" />
+                <div style={{ color:'#1b4332', fontSize:15, fontWeight:700, letterSpacing:'.04em' }}>Planning your route...</div>
+                <div style={{ color:'#6b7480', fontSize:12, marginTop:6 }}>Fetching live weather for each stop</div>
               </div>
             )}
 
             {!loading && route && (
-              <div className="rise" style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, padding:'13px 16px', marginBottom:14, display:'flex', flexWrap:'wrap', gap:8, alignItems:'center', justifyContent:'space-between' }}>
+              <div className="rise" style={{ background:'rgba(255,255,255,0.93)', border:'1px solid rgba(0,0,0,0.08)', borderRadius:14, padding:'14px 16px', marginBottom:14, display:'flex', flexWrap:'wrap', gap:8, alignItems:'center', justifyContent:'space-between', boxShadow:'0 2px 12px rgba(0,0,0,0.07)' }}>
                 <div>
-                  <div style={{ fontSize:18, fontWeight:800, color:'#f1f5f9' }}>
-                    {origin.split(',')[0]} <span style={{ color:'#2196F3' }}>→</span> {dest.split(',')[0]}
+                  <div style={{ fontSize:18, fontWeight:800, color:'#1e2d23' }}>
+                    {origin.split(',')[0]} <span style={{ color:'#2d6a4f' }}>→</span> {dest.split(',')[0]}
                   </div>
-                  <div style={{ fontFamily:"'Fira Code',monospace", fontSize:11, color:'#64748b', marginTop:2 }}>
+                  <div style={{ fontSize:12, color:'#6b7480', marginTop:3 }}>
                     {new Date(date+'T12:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
                     &nbsp;·&nbsp;Depart {fmtTime(dh*60)}&nbsp;·&nbsp;~{fmtTot(route.totalMin)}&nbsp;·&nbsp;{route.totalMiles}mi
                   </div>
                 </div>
                 <div style={{ display:'flex', gap:3 }}>
                   {stops.map((s,i) => (
-                    <div key={i} title={`${s.name}: ${s.condition}`} style={{ width:8, height:24, borderRadius:3, background:SCOL[s.severity]||'#94a3b8', opacity:.85 }} />
+                    <div key={i} title={`${s.name}: ${s.condition}`} style={{ width:8, height:24, borderRadius:3, background:SCOL[s.severity]||'#6b7280', opacity:.9 }} />
                   ))}
                 </div>
               </div>
@@ -680,19 +648,19 @@ export default function RouteSkies({ onBack }) {
 
             {/* TAB SWITCHER */}
             {!loading && stops.length>0 && revealed>=stops.length && (
-              <div className="no-print rise" style={{ display:'flex', gap:4, marginBottom:14, background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:12, padding:4 }}>
+              <div className="no-print rise" style={{ display:'flex', gap:4, marginBottom:14, background:'rgba(255,255,255,0.93)', border:'1px solid rgba(0,0,0,0.08)', borderRadius:12, padding:5, boxShadow:'0 2px 10px rgba(0,0,0,0.07)' }}>
                 {[
                   { id:'map',        label:'🗺️ Map View'       },
                   { id:'weather',    label:'🌦️ Weather Stops' },
-                  { id:'directions', label:'↗ Turn-by-Turn'   },
+                  { id:'directions', label:'↗ Directions'      },
                 ].map(tab => (
                   <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-                    flex:1, padding:'8px 0', border:'none', borderRadius:9, cursor:'pointer',
-                    fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'.05em',
-                    transition:'all .2s',
-                    background: activeTab===tab.id ? 'rgba(33,150,243,0.15)' : 'transparent',
-                    color:      activeTab===tab.id ? '#2196F3' : '#475569',
-                    boxShadow:  activeTab===tab.id ? 'inset 0 0 0 1px rgba(33,150,243,0.3)' : 'none',
+                    flex:1, padding:'11px 4px', border:'none', borderRadius:9, cursor:'pointer',
+                    fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'.04em',
+                    transition:'all .2s', lineHeight:1.2,
+                    background: activeTab===tab.id ? '#1b4332' : 'transparent',
+                    color:      activeTab===tab.id ? '#ffffff' : '#4a5e52',
+                    boxShadow:  activeTab===tab.id ? '0 2px 8px rgba(27,67,50,0.35)' : 'none',
                   }}>
                     {tab.label}
                   </button>
@@ -702,20 +670,20 @@ export default function RouteSkies({ onBack }) {
 
             {/* WEATHER STOPS helper note */}
             {!loading && activeTab==='weather' && revealed>=stops.length && (
-              <div style={{ fontSize:12, color:'#64748b', marginBottom:10, lineHeight:1.6, padding:'0 2px' }}>
-                Each stop shows the forecast for when you&apos;ll actually be there, not current conditions.
-                Unfamiliar stop name? Switch to <button onClick={()=>setActiveTab('map')} style={{ background:'none', border:'none', color:'#2196F3', cursor:'pointer', fontSize:12, padding:0, textDecoration:'underline' }}>Map View</button> to see exactly where it is along your route.
+              <div style={{ fontSize:13, color:'#4a5e52', marginBottom:10, lineHeight:1.6, padding:'8px 12px', background:'rgba(255,255,255,0.85)', borderRadius:9, border:'1px solid rgba(0,0,0,0.06)' }}>
+                Each stop shows the forecast for when you&apos;ll actually be there.&nbsp;
+                Unfamiliar stop name? Switch to <button onClick={()=>setActiveTab('map')} style={{ background:'none', border:'none', color:'#1b4332', cursor:'pointer', fontSize:13, padding:0, textDecoration:'underline', fontWeight:700 }}>Map View</button> to see where it falls along your route.
               </div>
             )}
 
             {/* WEATHER TAB — alert banner */}
             {!loading && activeTab==='weather' && alerts.length>0 && revealed>=stops.length && (
-              <div className="rise" style={{ background:'rgba(248,113,113,0.08)', border:'1px solid rgba(248,113,113,0.28)', borderRadius:12, padding:'11px 15px', marginBottom:12, display:'flex', gap:10, alignItems:'flex-start' }}>
-                <span style={{ fontSize:17, flexShrink:0 }}>⚠️</span>
+              <div className="rise" style={{ background:'#fef2f2', border:'1px solid rgba(220,38,38,0.25)', borderRadius:12, padding:'12px 15px', marginBottom:12, display:'flex', gap:10, alignItems:'flex-start', boxShadow:'0 2px 8px rgba(220,38,38,0.08)' }}>
+                <span style={{ fontSize:18, flexShrink:0 }}>⚠️</span>
                 <div>
-                  <div style={{ fontSize:13, fontWeight:800, color:'#fca5a5', marginBottom:2 }}>WEATHER ADVISORY</div>
-                  <div style={{ fontSize:13, color:'#94a3b8', lineHeight:1.55 }}>
-                    Precipitation expected near <span style={{ color:'#fca5a5', fontWeight:700 }}>{alerts.map(a=>a.name).join(', ')}</span>.
+                  <div style={{ fontSize:13, fontWeight:800, color:'#b91c1c', marginBottom:2 }}>WEATHER ADVISORY</div>
+                  <div style={{ fontSize:13, color:'#4a5e52', lineHeight:1.55 }}>
+                    Precipitation expected near <span style={{ color:'#b91c1c', fontWeight:700 }}>{alerts.map(a=>a.name).join(', ')}</span>.
                   </div>
                 </div>
               </div>
@@ -738,33 +706,33 @@ export default function RouteSkies({ onBack }) {
                       {!isLast && <div style={{ width:2, flexGrow:1, minHeight:22, background:`linear-gradient(to bottom,${color}60,${nextColor}60)` }} />}
                     </div>
 
-                    <div className="rise" style={{ flex:1, background:bg, border:`1px solid ${color}1a`, borderRadius:14, padding:'12px 14px', marginLeft:10, marginTop:10, animationDelay:`${i*45}ms` }}>
+                    <div className="rise" style={{ flex:1, background:'rgba(255,255,255,0.93)', borderLeft:`4px solid ${color}`, border:`1px solid rgba(0,0,0,0.08)`, borderLeftWidth:4, borderLeftColor:color, borderRadius:14, padding:'13px 14px', marginLeft:10, marginTop:10, animationDelay:`${i*45}ms`, boxShadow:'0 2px 10px rgba(0,0,0,0.07)' }}>
                       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
                         <div style={{ flex:1 }}>
-                          <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:3, flexWrap:'wrap' }}>
-                            <span style={{ fontSize:16, fontWeight:800, color:'#f1f5f9' }}>{wp.name}</span>
-                            {wp.state && <span style={{ fontFamily:"'Fira Code',monospace", fontSize:10, color:'#475569', background:'rgba(255,255,255,0.05)', padding:'1px 5px', borderRadius:4 }}>{wp.state}</span>}
-                            {wp.isStart && <span style={{ fontSize:9, fontWeight:800, color:'#2196F3', letterSpacing:'.08em' }}>START</span>}
-                            {wp.isEnd   && <span style={{ fontSize:9, fontWeight:800, color:'#34d399', letterSpacing:'.08em' }}>DEST</span>}
-                            {wp.custom  && <span style={{ fontSize:9, fontWeight:700, color:'#a78bfa' }}>CUSTOM</span>}
+                          <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:4, flexWrap:'wrap' }}>
+                            <span style={{ fontSize:16, fontWeight:800, color:'#1e2d23' }}>{wp.name}</span>
+                            {wp.state && <span style={{ fontSize:11, fontWeight:600, color:'#6b7280', background:'rgba(0,0,0,0.05)', padding:'1px 6px', borderRadius:4 }}>{wp.state}</span>}
+                            {wp.isStart && <span style={{ fontSize:9, fontWeight:800, color:'#1b4332', background:'rgba(27,67,50,0.1)', padding:'1px 6px', borderRadius:4, letterSpacing:'.06em' }}>START</span>}
+                            {wp.isEnd   && <span style={{ fontSize:9, fontWeight:800, color:'#16a34a', background:'rgba(22,163,74,0.1)', padding:'1px 6px', borderRadius:4, letterSpacing:'.06em' }}>DEST</span>}
+                            {wp.custom  && <span style={{ fontSize:9, fontWeight:700, color:'#7c3aed', background:'rgba(124,58,237,0.08)', padding:'1px 6px', borderRadius:4 }}>CUSTOM</span>}
                             {!wp.isStart && !wp.isEnd && revealed>=stops.length && (
                               <button className="btn-remove no-print" onClick={() => removeStop(i)}>✕ Remove</button>
                             )}
                           </div>
-                          <div style={{ fontFamily:"'Fira Code',monospace", fontSize:11, color:'#64748b' }}>
-                            {wp.isStart?'Depart':'~Arrive'} <span style={{ color:'#94a3b8' }}>{fmtTime(arrMin)}</span>
-                            {fmtOff(wp.offsetMin) && <span style={{ color:'#334155' }}> · {fmtOff(wp.offsetMin)}</span>}
+                          <div style={{ fontSize:12, color:'#6b7280', fontWeight:500 }}>
+                            {wp.isStart?'Depart':'~Arrive'} <span style={{ color:'#1e2d23', fontWeight:700 }}>{fmtTime(arrMin)}</span>
+                            {fmtOff(wp.offsetMin) && <span style={{ color:'#9caaa2' }}> · {fmtOff(wp.offsetMin)}</span>}
                           </div>
                         </div>
-                        <div style={{ textAlign:'right', flexShrink:0, marginLeft:10 }}>
-                          <div style={{ fontSize:26, lineHeight:1 }}>{wp.icon}</div>
-                          <div style={{ fontSize:20, fontWeight:700, fontFamily:"'Fira Code',monospace", color:'#f1f5f9', marginTop:2 }}>{wp.temp}°</div>
+                        <div style={{ textAlign:'right', flexShrink:0, marginLeft:12 }}>
+                          <div style={{ fontSize:28, lineHeight:1 }}>{wp.icon}</div>
+                          <div style={{ fontSize:22, fontWeight:800, color:'#1e2d23', marginTop:2 }}>{wp.temp}°</div>
                         </div>
                       </div>
-                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:8, paddingTop:8, borderTop:'1px solid rgba(255,255,255,0.05)' }}>
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:9, paddingTop:9, borderTop:'1px solid rgba(0,0,0,0.07)' }}>
                         <span style={{ fontSize:13, fontWeight:700, color }}>{wp.condition}</span>
-                        <div style={{ display:'flex', gap:9, fontFamily:"'Fira Code',monospace", fontSize:11, color:'#64748b' }}>
-                          <span style={{ color:wp.precipPct>=50?'#60a5fa':'#64748b' }}>💧{wp.precipPct}%</span>
+                        <div style={{ display:'flex', gap:9, fontSize:12, color:'#6b7280' }}>
+                          <span style={{ color:wp.precipPct>=50?'#1d4ed8':'#6b7280' }}>💧{wp.precipPct}%</span>
                           <span>💨{wp.wind}mph</span>
                           <span>💦{wp.humidity}%</span>
                         </div>
@@ -774,13 +742,13 @@ export default function RouteSkies({ onBack }) {
 
                   {!isLast && revealed>=stops.length && (
                     <div className="no-print" style={{ paddingLeft:44 }}>
-                      <div style={{ marginLeft:10, borderLeft:'2px dashed rgba(255,255,255,0.06)', paddingLeft:12, paddingTop:5, paddingBottom:5 }}>
+                      <div style={{ marginLeft:10, borderLeft:'2px dashed rgba(0,0,0,0.1)', paddingLeft:12, paddingTop:5, paddingBottom:5 }}>
                         {!slot ? (
                           <button className="btn-add-stop" onClick={() => openSlot(i)}>+ Add a Stop After {wp.name}</button>
                         ) : (
-                          <div className="fade" style={{ background:'rgba(167,139,250,0.07)', border:'1px solid rgba(167,139,250,0.25)', borderRadius:10, padding:'11px 13px' }}>
-                            <div style={{ fontFamily:"'Fira Code',monospace", fontSize:10, color:'#a78bfa', letterSpacing:'.07em', marginBottom:7 }}>ADD STOP AFTER {wp.name.toUpperCase()}</div>
-                            <input autoFocus className="inp" style={{ fontSize:12 }} placeholder="City, State (e.g. Savannah, GA)"
+                          <div className="fade" style={{ background:'rgba(255,255,255,0.93)', border:'1px solid rgba(124,58,237,0.2)', borderRadius:10, padding:'12px 13px', boxShadow:'0 2px 8px rgba(0,0,0,0.06)' }}>
+                            <div style={{ fontSize:10, fontWeight:700, color:'#7c3aed', letterSpacing:'.07em', textTransform:'uppercase', marginBottom:7 }}>ADD STOP AFTER {wp.name.toUpperCase()}</div>
+                            <input autoFocus className="form-inp" style={{ fontSize:13 }} placeholder="City, State (e.g. Savannah, GA)"
                               value={slot.input}
                               onChange={e => updateSlot(i, e.target.value)}
                               onKeyDown={e => { if(e.key==='Enter') confirmAddStop(i, slot.input) }}
@@ -800,7 +768,7 @@ export default function RouteSkies({ onBack }) {
 
             {/* MAP EXPLANATION — only shown on map tab */}
             {!loading && activeTab==='map' && stops.length>0 && (
-              <div style={{ fontSize:12, color:'#64748b', marginBottom:8, lineHeight:1.6, padding:'0 2px' }}>
+              <div style={{ fontSize:13, color:'#4a5e52', marginBottom:8, lineHeight:1.6, padding:'8px 12px', background:'rgba(255,255,255,0.85)', borderRadius:9, border:'1px solid rgba(0,0,0,0.06)' }}>
                 Map markers show forecast stops along your route, timed to when you&apos;re expected to reach each area.
                 Tap any marker for full weather details.
               </div>
@@ -820,15 +788,15 @@ export default function RouteSkies({ onBack }) {
 
             {/* DIRECTIONS TAB */}
             {!loading && activeTab==='directions' && directions.length>0 && (
-              <div className="rise" style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, overflow:'hidden' }}>
+              <div className="rise" style={{ background:'rgba(255,255,255,0.93)', border:'1px solid rgba(0,0,0,0.08)', borderRadius:14, overflow:'hidden', boxShadow:'0 2px 12px rgba(0,0,0,0.07)' }}>
                 {directions.map((step, i) => (
-                  <div key={i} style={{ display:'flex', gap:12, padding:'11px 14px', borderBottom: i < directions.length-1 ? '1px solid rgba(255,255,255,0.05)' : 'none', alignItems:'flex-start' }}>
-                    <div style={{ width:30, height:30, borderRadius:'50%', background:'rgba(33,150,243,0.08)', border:'1px solid rgba(33,150,243,0.18)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:14, color:'#2196F3' }}>
+                  <div key={i} style={{ display:'flex', gap:12, padding:'13px 14px', borderBottom: i < directions.length-1 ? '1px solid rgba(0,0,0,0.06)' : 'none', alignItems:'flex-start' }}>
+                    <div style={{ width:32, height:32, borderRadius:'50%', background:'rgba(27,67,50,0.08)', border:'1px solid rgba(27,67,50,0.18)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:15, color:'#1b4332' }}>
                       {MANEUVER_ICON[step.maneuver] || '⬆'}
                     </div>
                     <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:14, color:'#e2e8f0', lineHeight:1.45 }}>{step.instruction}</div>
-                      <div style={{ fontFamily:"'Fira Code',monospace", fontSize:10, color:'#475569', marginTop:3 }}>
+                      <div style={{ fontSize:15, color:'#1e2d23', lineHeight:1.5 }}>{step.instruction}</div>
+                      <div style={{ fontSize:12, color:'#6b7280', marginTop:3 }}>
                         {step.distance}&nbsp;·&nbsp;{step.duration}
                       </div>
                     </div>
@@ -848,9 +816,9 @@ export default function RouteSkies({ onBack }) {
             )}
 
             {!loading && stops.length>0 && (
-              <div style={{ marginTop:12, padding:'10px 14px', borderRadius:10, background:'rgba(33,150,243,0.03)', border:'1px solid rgba(33,150,243,0.08)', textAlign:'center' }}>
-                <div style={{ fontSize:10, color:'#334155', fontFamily:"'Fira Code',monospace", lineHeight:1.8 }}>
-                  Real routes via Google Maps · Live weather via Open-Meteo · Arrival times approx at 65mph
+              <div style={{ marginTop:12, padding:'10px 14px', borderRadius:10, background:'rgba(255,255,255,0.85)', border:'1px solid rgba(0,0,0,0.07)', textAlign:'center' }}>
+                <div style={{ fontSize:11, color:'#6b7480', lineHeight:1.8 }}>
+                  Real routes via Google Maps · Live weather via Tomorrow.io · Arrival times approx at 65 mph avg
                 </div>
               </div>
             )}
