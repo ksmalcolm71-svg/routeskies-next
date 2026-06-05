@@ -299,11 +299,22 @@ export default function RouteSkies({ onBack }) {
     setInstallPrompt(null)
   }
 
-  // On mount, load any previously saved route from localStorage
+  // On mount: load saved route + check for pre-filled values from landing page
   useEffect(() => {
     try {
       const raw = localStorage.getItem('rs_last')
       if (raw) setSavedRoute(JSON.parse(raw))
+    } catch {}
+    try {
+      const pre = localStorage.getItem('rs_prefill')
+      if (pre) {
+        const { origin: o, dest: d, date: dt, timeHour: th } = JSON.parse(pre)
+        if (o)  setOrigin(o)
+        if (d)  setDest(d)
+        if (dt) setDate(dt)
+        if (th) setTimeHour(th)
+        localStorage.removeItem('rs_prefill')
+      }
     } catch {}
   }, [])
 
@@ -424,8 +435,8 @@ export default function RouteSkies({ onBack }) {
         .inp:focus{border-color:rgba(33,150,243,.5);background:rgba(255,255,255,0.08);}
         .inp::placeholder{color:#334155;}
 
-        .btn-primary{background:linear-gradient(135deg,#2196F3,#1976D2);color:#0f1520;border:none;border-radius:12px;padding:14px 0;width:100%;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 0 32px rgba(33,150,243,0.3);transition:transform .15s,box-shadow .15s;}
-        .btn-primary:hover{transform:scale(1.02);box-shadow:0 0 44px rgba(33,150,243,0.5);}
+        .btn-primary{background:linear-gradient(135deg,#2d6a4f,#1b4332);color:#fff;border:none;border-radius:12px;padding:14px 0;width:100%;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 4px 18px rgba(45,106,79,0.4);transition:transform .15s,box-shadow .15s;}
+        .btn-primary:hover{transform:scale(1.02);box-shadow:0 6px 28px rgba(45,106,79,0.55);}
         .btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
         .btn-ghost{background:rgba(255,255,255,0.05);color:#94a3b8;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
         .btn-ghost:hover{background:rgba(255,255,255,0.09);color:#e2e8f0;}
@@ -436,15 +447,24 @@ export default function RouteSkies({ onBack }) {
         .btn-remove{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:6px;color:#f87171;font-size:11px;font-weight:700;font-family:'Barlow Condensed',sans-serif;padding:3px 9px;cursor:pointer;transition:all .15s;flex-shrink:0;}
         .btn-remove:hover{background:rgba(248,113,113,0.22);}
         .route-pill{padding:9px 12px;border-radius:10px;cursor:pointer;border:1px solid transparent;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:'Barlow Condensed',sans-serif;}
-        .sug-box{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:50;background:#0f1628;border:1px solid rgba(33,150,243,0.2);border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
-        .sug-item{padding:9px 14px;font-family:'Fira Code',monospace;font-size:12px;color:#94a3b8;cursor:pointer;transition:background .15s;display:flex;gap:8px;align-items:center;}
-        .sug-item:hover{background:rgba(33,150,243,0.1);color:#f1f5f9;}
-        .sug-badge{font-size:10px;color:#2196F3;background:rgba(33,150,243,0.12);padding:1px 6px;border-radius:4px;flex-shrink:0;}
+        .sug-box{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:50;background:#fff;border:1.5px solid #d4ddd6;border-radius:10px;overflow:hidden;box-shadow:0 8px 28px rgba(30,45,35,0.12);}
+        .sug-item{padding:10px 14px;font-family:'Barlow',sans-serif;font-size:14px;color:#4a5e52;cursor:pointer;transition:background .15s;display:flex;gap:8px;align-items:center;}
+        .sug-item:hover{background:rgba(45,106,79,0.07);color:#1b4332;}
+        .sug-badge{font-size:11px;color:#2d6a4f;background:rgba(45,106,79,0.1);padding:2px 7px;border-radius:4px;flex-shrink:0;font-weight:600;}
         ::-webkit-scrollbar{width:3px;}
         ::-webkit-scrollbar-thumb{background:#1e2a44;border-radius:3px;}
         @media print{.no-print{display:none!important;}body{background:white!important;color:#111!important;}}
 
         @keyframes rs-drive{from{transform:translateY(0)}to{transform:translateY(84px)}}
+
+        /* ── Light form card (home screen only) ── */
+        .form-card{background:#fff;border:1px solid #d4ddd6;border-radius:16px;padding:22px 20px;box-shadow:0 4px 24px rgba(30,45,35,0.09);}
+        .form-label{display:block;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:#4a5e52;letter-spacing:.09em;text-transform:uppercase;margin-bottom:5px;}
+        .form-inp{width:100%;background:#f8faf9;border:1.5px solid #d4ddd6;border-radius:9px;padding:11px 13px;color:#1e2d23;font-family:'Barlow',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+        .form-inp:focus{border-color:#2d6a4f;background:#fff;}
+        .form-inp::placeholder{color:#9caaa2;}
+        .home-hero-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(26px,5vw,36px);color:#1b4332;line-height:1.15;margin-bottom:6px;}
+        .home-hero-sub{font-size:14px;color:#4a5e52;line-height:1.7;max-width:320px;}
       `}</style>
 
       {/* ── ANIMATED ROAD BACKGROUND (home screen only) ──────────────────
@@ -491,28 +511,28 @@ export default function RouteSkies({ onBack }) {
             top:'-100px',
             bottom:'-100px',
             opacity:l.op,
-            background:'repeating-linear-gradient(to bottom,#2196F3 0,#2196F3 28px,transparent 28px,transparent 84px)',
+            background:'repeating-linear-gradient(to bottom,#4a7c59 0,#4a7c59 28px,transparent 28px,transparent 84px)',
             animation:`rs-drive ${l.dur} ${l.delay} linear infinite`,
           }} />
         ))}
       </div>
 
       {/* HEADER */}
-      <div className="no-print" style={{ background:'linear-gradient(180deg,#151f2e 0%,#0f1520 100%)', borderBottom:'1px solid rgba(33,150,243,0.15)', padding:'15px 20px 11px', position:'sticky', top:0, zIndex:30, isolation:'isolate' }}>
+      <div className="no-print" style={{ background:'rgba(247,249,247,0.97)', backdropFilter:'blur(10px)', borderBottom:'1px solid #d4ddd6', padding:'13px 20px', position:'sticky', top:0, zIndex:30, isolation:'isolate' }}>
         <div style={{ maxWidth:580, margin:'0 auto', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:10, cursor:onBack?'pointer':'default' }} onClick={onBack}>
-            <span style={{ fontSize:20 }}>🛣️</span>
-            <span style={{ fontSize:21, fontWeight:900, letterSpacing:'.1em', color:'#2196F3', textShadow:'0 0 24px rgba(33,150,243,.4)', textTransform:'uppercase' }}>RouteSkies</span>
-            <span style={{ fontFamily:"'Fira Code',monospace", fontSize:9, color:'#2196F3', background:'rgba(33,150,243,0.12)', border:'1px solid rgba(33,150,243,0.25)', padding:'2px 6px', borderRadius:4 }}>BETA</span>
+          <div style={{ display:'flex', alignItems:'center', gap:9, cursor:onBack?'pointer':'default' }} onClick={onBack}>
+            <span style={{ fontSize:19 }}>🛣️</span>
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:20, fontWeight:800, letterSpacing:'.06em', color:'#1b4332', textTransform:'uppercase' }}>RouteSkies</span>
+            <span style={{ fontSize:9, fontWeight:700, color:'#fff', background:'#2d6a4f', padding:'2px 7px', borderRadius:4, letterSpacing:'.1em', textTransform:'uppercase' }}>BETA</span>
           </div>
           <div style={{ display:'flex', gap:8, alignItems:'center' }}>
             {screen==='results' && <button className="btn-ghost" style={{ fontSize:12, padding:'6px 12px' }} onClick={() => { setScreen('home'); setStops([]); setDirections([]); setActiveTab('map') }}>← New Route</button>}
             {onBack && <button className="btn-ghost" style={{ fontSize:12, padding:'6px 12px' }} onClick={onBack}>🏠 Home</button>}
             {installPrompt && !isInstalled && (
               <button onClick={handleInstall} style={{
-                fontSize:11, padding:'5px 10px', fontWeight:700, letterSpacing:'.05em',
-                background:'rgba(33,150,243,0.15)', color:'#2196F3',
-                border:'1px solid rgba(33,150,243,0.4)', borderRadius:8, cursor:'pointer',
+                fontSize:11, padding:'5px 10px', fontWeight:700,
+                background:'rgba(45,106,79,0.1)', color:'#2d6a4f',
+                border:'1px solid rgba(45,106,79,0.35)', borderRadius:8, cursor:'pointer',
                 display:'flex', alignItems:'center', gap:5, whiteSpace:'nowrap',
               }}>
                 ⬇ Install App
@@ -527,35 +547,35 @@ export default function RouteSkies({ onBack }) {
         {/* HOME */}
         {screen==='home' && (
           <div className="rise">
-            <div style={{ textAlign:'center', padding:'24px 0 28px' }}>
-              <div style={{ fontSize:48, marginBottom:10 }}>🌦️</div>
-              <h1 style={{ fontSize:28, fontWeight:900, letterSpacing:'.04em', color:'#f1f5f9', lineHeight:1.2, marginBottom:8 }}>
-                See weather where<br/><em style={{ color:'#2196F3' }}>you'll actually be.</em>
+            {/* Hero text */}
+            <div style={{ padding:'28px 0 22px' }}>
+              <h1 className="home-hero-title">
+                Weather for<br/>the road ahead.
               </h1>
-              <p style={{ fontSize:14, color:'#64748b', lineHeight:1.8, maxWidth:300, margin:'0 auto' }}>
-                Time-adjusted forecasts at every stop on your drive.
+              <p className="home-hero-sub">
+                Time-adjusted forecasts at every stop on your drive — timed to when you'll actually be there.
               </p>
             </div>
 
             {/* RESUME LAST ROUTE */}
             {savedRoute?.route && (
-              <div className="rise" style={{ background:'rgba(52,211,153,0.06)', border:'1px solid rgba(52,211,153,0.25)', borderRadius:14, padding:'13px 16px', marginBottom:14 }}>
+              <div className="rise" style={{ background:'rgba(45,106,79,0.07)', border:'1px solid rgba(45,106,79,0.22)', borderRadius:14, padding:'13px 16px', marginBottom:16 }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:10 }}>
                   <div style={{ flex:1 }}>
-                    <div style={{ fontFamily:"'Fira Code',monospace", fontSize:10, color:'#34d399', letterSpacing:'.08em', marginBottom:4 }}>
-                      LAST ROUTE · {savedRoute.savedAt ? timeAgo(savedRoute.savedAt) : 'saved'}
+                    <div style={{ fontSize:10, fontWeight:700, color:'#2d6a4f', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:4 }}>
+                      Last Route · {savedRoute.savedAt ? timeAgo(savedRoute.savedAt) : 'saved'}
                     </div>
-                    <div style={{ fontSize:17, fontWeight:800, color:'#f1f5f9' }}>
+                    <div style={{ fontSize:17, fontWeight:800, color:'#1e2d23' }}>
                       {(savedRoute.origin || savedRoute.route.origin || '').split(',')[0]}
-                      <span style={{ color:'#2196F3', margin:'0 6px' }}>→</span>
+                      <span style={{ color:'#2d6a4f', margin:'0 6px' }}>→</span>
                       {(savedRoute.dest   || savedRoute.route.dest   || '').split(',')[0]}
                     </div>
-                    <div style={{ fontFamily:"'Fira Code',monospace", fontSize:11, color:'#64748b', marginTop:2 }}>
+                    <div style={{ fontSize:12, color:'#6b7480', marginTop:2 }}>
                       {savedRoute.route.totalMiles}mi · ~{fmtTot(savedRoute.route.totalMin)}
                       {savedRoute.stops?.length ? ` · ${savedRoute.stops.length} stops` : ''}
                     </div>
                   </div>
-                  <button onClick={dismissSaved} style={{ background:'none', border:'none', color:'#334155', cursor:'pointer', fontSize:18, lineHeight:1, padding:'2px 4px', flexShrink:0 }}>✕</button>
+                  <button onClick={dismissSaved} style={{ background:'none', border:'none', color:'#94a3b8', cursor:'pointer', fontSize:18, lineHeight:1, padding:'2px 4px', flexShrink:0 }}>✕</button>
                 </div>
                 <button className="btn-primary" style={{ marginTop:12, fontSize:15, padding:'11px 0' }} onClick={restoreRoute}>
                   Resume This Route →
@@ -563,19 +583,20 @@ export default function RouteSkies({ onBack }) {
               </div>
             )}
 
-            <div style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:16, padding:'20px 18px', display:'flex', flexDirection:'column', gap:14 }}>
+            {/* FORM CARD */}
+            <div className="form-card" style={{ display:'flex', flexDirection:'column', gap:16 }}>
 
               {/* Route type */}
               <div>
-                <div style={{ fontFamily:"'Fira Code',monospace", fontSize:10, color:'#64748b', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:8 }}>Route Preference</div>
+                <div className="form-label">Route Preference</div>
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
                   {ROUTE_OPTS.map(o => {
                     const active = routeType===o.id
                     return (
-                      <button key={o.id} className="route-pill" onClick={() => setRouteType(o.id)} style={{ background:active?'rgba(33,150,243,0.12)':'rgba(255,255,255,0.04)', border:active?'1px solid rgba(33,150,243,0.5)':'1px solid rgba(255,255,255,0.08)', color:active?'#2196F3':'#64748b' }}>
+                      <button key={o.id} className="route-pill" onClick={() => setRouteType(o.id)} style={{ background:active?'rgba(45,106,79,0.10)':'rgba(0,0,0,0.03)', border:active?'1px solid rgba(45,106,79,0.45)':'1px solid rgba(0,0,0,0.1)', color:active?'#1b4332':'#6b7480' }}>
                         <span style={{ fontSize:18 }}>{o.icon}</span>
                         <span style={{ fontSize:13, fontWeight:800 }}>{o.label}</span>
-                        <span style={{ fontSize:10, fontFamily:"'Fira Code',monospace", opacity:.7, textTransform:'none', letterSpacing:0 }}>{o.desc}</span>
+                        <span style={{ fontSize:10, opacity:.7, textTransform:'none', letterSpacing:0 }}>{o.desc}</span>
                       </button>
                     )
                   })}
@@ -584,9 +605,9 @@ export default function RouteSkies({ onBack }) {
 
               {/* Origin */}
               <div>
-                <label style={{ display:'block', fontFamily:"'Fira Code',monospace", fontSize:10, color:'#64748b', letterSpacing:'.08em', marginBottom:5, textTransform:'uppercase' }}>Starting From</label>
+                <label className="form-label">Starting From</label>
                 <div style={{ position:'relative' }}>
-                  <input className="inp" placeholder="e.g. Fort Lauderdale, FL" value={origin}
+                  <input className="form-inp" placeholder="e.g. Fort Lauderdale, FL" value={origin}
                     onChange={e => { setOrigin(e.target.value); setOSug(e.target.value.length>1?fuzzyMatch(e.target.value):[]) }}
                     onBlur={() => setTimeout(()=>setOSug([]),160)}
                   />
@@ -604,9 +625,9 @@ export default function RouteSkies({ onBack }) {
 
               {/* Destination */}
               <div>
-                <label style={{ display:'block', fontFamily:"'Fira Code',monospace", fontSize:10, color:'#64748b', letterSpacing:'.08em', marginBottom:5, textTransform:'uppercase' }}>Destination</label>
+                <label className="form-label">Destination</label>
                 <div style={{ position:'relative' }}>
-                  <input className="inp" placeholder="e.g. Tampa, FL" value={dest}
+                  <input className="form-inp" placeholder="e.g. Nashville, TN" value={dest}
                     onChange={e => { setDest(e.target.value); setDSug(e.target.value.length>1?fuzzyMatch(e.target.value):[]) }}
                     onBlur={() => setTimeout(()=>setDSug([]),160)}
                   />
@@ -625,12 +646,12 @@ export default function RouteSkies({ onBack }) {
               {/* Date + Time */}
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
                 <div>
-                  <label style={{ display:'block', fontFamily:"'Fira Code',monospace", fontSize:10, color:'#64748b', letterSpacing:'.08em', marginBottom:5, textTransform:'uppercase' }}>Departure Date</label>
-                  <input type="date" className="inp" value={date} onChange={e=>setDate(e.target.value)} style={{ colorScheme:'dark' }} />
+                  <label className="form-label">Departure Date</label>
+                  <input type="date" className="form-inp" value={date} onChange={e=>setDate(e.target.value)} />
                 </div>
                 <div>
-                  <label style={{ display:'block', fontFamily:"'Fira Code',monospace", fontSize:10, color:'#64748b', letterSpacing:'.08em', marginBottom:5, textTransform:'uppercase' }}>Leave At</label>
-                  <select className="inp" value={timeHour} onChange={e=>setTimeHour(e.target.value)} style={{ cursor:'pointer' }}>
+                  <label className="form-label">Leave At</label>
+                  <select className="form-inp" value={timeHour} onChange={e=>setTimeHour(e.target.value)} style={{ cursor:'pointer' }}>
                     {Array.from({length:18},(_,i)=>i+5).map(h => {
                       const h12=h%12||12, ap=h>=12?'PM':'AM'
                       return <option key={h} value={h}>{h12}:00 {ap}</option>
