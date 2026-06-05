@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
-import MapView from '@/components/MapView'
+import MapView        from '@/components/MapView'
+import InstallPrompt  from '@/components/InstallPrompt'
 
 // ─────────────────────────────────────────────────────────────────
 // CITY AUTOCOMPLETE DATABASE
@@ -278,26 +279,7 @@ export default function RouteSkies({ onBack }) {
   const [dSug,      setDSug]      = useState([])
   const [directions, setDirections] = useState([])
   const [activeTab,  setActiveTab]  = useState('map')
-  const [savedRoute,    setSavedRoute]    = useState(null)
-  const [installPrompt, setInstallPrompt] = useState(null)
-  const [isInstalled,   setIsInstalled]   = useState(false)
-
-  // Capture the browser's install prompt and detect standalone mode
-  useEffect(() => {
-    const handler = (e) => { e.preventDefault(); setInstallPrompt(e) }
-    window.addEventListener('beforeinstallprompt', handler)
-    window.addEventListener('appinstalled', () => { setInstallPrompt(null); setIsInstalled(true) })
-    if (window.matchMedia('(display-mode: standalone)').matches) setIsInstalled(true)
-    return () => window.removeEventListener('beforeinstallprompt', handler)
-  }, [])
-
-  async function handleInstall() {
-    if (!installPrompt) return
-    installPrompt.prompt()
-    const { outcome } = await installPrompt.userChoice
-    if (outcome === 'accepted') setIsInstalled(true)
-    setInstallPrompt(null)
-  }
+  const [savedRoute, setSavedRoute] = useState(null)
 
   // On mount: load saved route + check for pre-filled values from landing page
   useEffect(() => {
@@ -528,16 +510,7 @@ export default function RouteSkies({ onBack }) {
           <div style={{ display:'flex', gap:8, alignItems:'center' }}>
             {screen==='results' && <button className="btn-ghost" style={{ fontSize:12, padding:'6px 12px' }} onClick={() => { setScreen('home'); setStops([]); setDirections([]); setActiveTab('map') }}>← New Route</button>}
             {onBack && <button className="btn-ghost" style={{ fontSize:12, padding:'6px 12px' }} onClick={onBack}>🏠 Home</button>}
-            {installPrompt && !isInstalled && (
-              <button onClick={handleInstall} style={{
-                fontSize:11, padding:'5px 10px', fontWeight:700,
-                background:'rgba(45,106,79,0.1)', color:'#2d6a4f',
-                border:'1px solid rgba(45,106,79,0.35)', borderRadius:8, cursor:'pointer',
-                display:'flex', alignItems:'center', gap:5, whiteSpace:'nowrap',
-              }}>
-                ⬇ Install App
-              </button>
-            )}
+            <InstallPrompt />
           </div>
         </div>
       </div>

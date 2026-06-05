@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 
 // ── Severity → pin/border color ──────────────────────────────────
 const PIN = {
@@ -47,6 +47,25 @@ export default function MapView({ route, stops, departHour, active }) {
 
   const [mapStatus, setMapStatus] = useState('idle') // idle | loading | ready | error
 
+  // ── Responsive map height ─────────────────────────────────────────
+  // 520px on desktop (≥640px wide), 420px on mobile.
+  // Stored in state so a window resize updates the container and
+  // triggers the resize effect below.
+  const [mapHeight, setMapHeight] = useState(480) // safe SSR default
+  useEffect(() => {
+    const update = () => setMapHeight(window.innerWidth < 640 ? 420 : 520)
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
+  // Re-measure the map when its pixel height changes (e.g. window resize)
+  useEffect(() => {
+    if (!mapRef.current || !window.google?.maps) return
+    window.google.maps.event.trigger(mapRef.current, 'resize')
+    if (boundsRef.current) mapRef.current.fitBounds(boundsRef.current)
+  }, [mapHeight])
+
   // ─────────────────────────────────────────────────────────────────
   // EFFECT 1 — Data-driven initialization.
   //
@@ -54,7 +73,7 @@ export default function MapView({ route, stops, departHour, active }) {
   // soon as route + stops arrive, regardless of which tab is showing.
   //
   // WHY: the container's parent clips to maxHeight:0 when inactive
-  // (see JSX), but the container itself always has height:350 so
+  // (see JSX), but the container itself always has an explicit height so
   // Google Maps can measure real pixel dimensions on any tab.
   // Decoupling init from `active` means the map is ready the moment
   // the user first opens Map View — no "build-on-first-show" race.
@@ -305,12 +324,12 @@ export default function MapView({ route, stops, departHour, active }) {
 
   // IMPORTANT: use maxHeight clip instead of display:none/block.
   // maxHeight:0 + overflow:hidden hides the map visually and removes it
-  // from page flow, BUT the container div inside still has an explicit
-  // height:350px so Google Maps always reads real pixel dimensions.
+  // from page flow, BUT the container div inside always has an explicit
+  // pixel height (mapHeight) so Google Maps reads real dimensions.
   // display:none would report 0×0 and break Maps initialization.
   return (
     <div style={{
-      maxHeight: active ? 600 : 0,
+      maxHeight: active ? mapHeight + 80 : 0,
       overflow:  'hidden',
       transition: 'max-height 0.25s ease',
       marginBottom: active ? 14 : 0,
@@ -332,10 +351,10 @@ export default function MapView({ route, stops, departHour, active }) {
         </div>
       ) : (
         <div style={{ position:'relative', borderRadius:12, overflow:'hidden' }}>
-          {/* The map container — always height:350 so Google Maps can measure it */}
+          {/* Container — always has explicit height so Google Maps measures it correctly */}
           <div
             ref={containerRef}
-            style={{ width:'100%', height:350, background:'#0d1a2d' }}
+            style={{ width:'100%', height: mapHeight, background:'#0d1a2d' }}
           />
 
           {/* Loading overlay */}
