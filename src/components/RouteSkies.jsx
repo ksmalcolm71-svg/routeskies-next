@@ -727,7 +727,15 @@ export default function RouteSkies({ onBack }) {
               </div>
             )}
 
-            {/* WEATHER TAB */}
+            {/* WEATHER STOPS helper note */}
+            {!loading && activeTab==='weather' && revealed>=stops.length && (
+              <div style={{ fontSize:12, color:'#64748b', marginBottom:10, lineHeight:1.6, padding:'0 2px' }}>
+                Each stop shows the forecast for when you&apos;ll actually be there, not current conditions.
+                Unfamiliar stop name? Switch to <button onClick={()=>setActiveTab('map')} style={{ background:'none', border:'none', color:'#2196F3', cursor:'pointer', fontSize:12, padding:0, textDecoration:'underline' }}>Map View</button> to see exactly where it is along your route.
+              </div>
+            )}
+
+            {/* WEATHER TAB — alert banner */}
             {!loading && activeTab==='weather' && alerts.length>0 && revealed>=stops.length && (
               <div className="rise" style={{ background:'rgba(248,113,113,0.08)', border:'1px solid rgba(248,113,113,0.28)', borderRadius:12, padding:'11px 15px', marginBottom:12, display:'flex', gap:10, alignItems:'flex-start' }}>
                 <span style={{ fontSize:17, flexShrink:0 }}>⚠️</span>
@@ -817,8 +825,17 @@ export default function RouteSkies({ onBack }) {
               )
             })}
 
-            {/* MAP TAB — always mounted once results are ready so the map instance
-                survives tab switches; hidden with display:none when inactive */}
+            {/* MAP EXPLANATION — only shown on map tab */}
+            {!loading && activeTab==='map' && stops.length>0 && (
+              <div style={{ fontSize:12, color:'#64748b', marginBottom:8, lineHeight:1.6, padding:'0 2px' }}>
+                Map markers show forecast stops along your route, timed to when you&apos;re expected to reach each area.
+                Tap any marker for full weather details.
+              </div>
+            )}
+
+            {/* MAP TAB — always mounted once route data is ready.
+                Uses maxHeight clip (not display:none) so Google Maps always
+                has a real-dimensions container, fixing blank-on-first-load. */}
             {!loading && route && stops.length>0 && (
               <MapView
                 route={route}
